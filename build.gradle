@@ -1,0 +1,34 @@
+plugins {
+    id 'scala'
+}
+
+group 'hu.szigyi'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    scalaMajorVersion = "2.12"
+    scalaMinorVersion = ".6"
+    scalaVersion = scalaMajorVersion + scalaMinorVersion
+    pureConfigVersion = "0.9.1"
+    typesafeLoggingVersion = "3.9.0"
+    junitVersion = "4.12"
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: "$scalaVersion"
+    compile group: 'com.github.pureconfig', name: "pureconfig_$scalaMajorVersion", version: pureConfigVersion
+    compile group: 'com.typesafe.scala-logging', name: "scala-logging_$scalaMajorVersion", version: typesafeLoggingVersion
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+    compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.11.0'
+
+
+
+    testCompile group: 'junit', name: 'junit', version: junitVersion
+}
