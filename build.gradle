@@ -26,7 +26,9 @@ dependencies {
     compile group: 'com.typesafe.scala-logging', name: "scala-logging_$scalaMajorVersion", version: typesafeLoggingVersion
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 
-    compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.11.0'
+    compile group: 'com.nrinaudo', name: "kantan.xpath_$scalaMajorVersion", version: '0.4.0'
+
+//    compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.11.0'
 
 
 

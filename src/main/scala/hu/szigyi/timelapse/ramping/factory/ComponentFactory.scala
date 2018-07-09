@@ -10,5 +10,5 @@ trait ComponentFactory extends LazyLogging with ConfigurationFactory {
   val fsUtil = FsUtil()
   val reader = Reader(imagesConfig, fsUtil)
   val cli = CLI()
-  val xmpService = XmpService(cli, fsUtil, reader)
+  val xmpService = XmpService(defaultConfig, cli, fsUtil, reader)
 }

@@ -17,7 +17,7 @@ class FsUtil extends LazyLogging {
 
   def filterImages(imagesConfig: ImagesConfig): FilenameFilter = {
     (_: File, name: String) => {
-      imagesConfig.suppoertedFileExtensions.collectFirst {
+      imagesConfig.supportedFileExtensions.collectFirst {
         case ext if name.toLowerCase.endsWith(s".${ext.toLowerCase}") => ext
       }.isDefined
     }
