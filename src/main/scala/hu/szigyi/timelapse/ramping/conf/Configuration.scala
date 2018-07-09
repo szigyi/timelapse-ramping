@@ -7,5 +7,5 @@ case class TimelapseRamping(imagesConfig: ImagesConfig,
 
 case class ImagesConfig(supportedFileExtensions: List[String])
 
-case class Default(manualLens: Boolean,
-                   aperture: BigDecimal)
+case class Default(aperture: Option[BigDecimal],
+                   exposureBias: Option[BigDecimal])

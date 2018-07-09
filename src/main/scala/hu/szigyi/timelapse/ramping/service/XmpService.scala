@@ -55,6 +55,8 @@ class XmpService(default: Default,
 
   private def getShutterSpeed(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
+    // TODO consider all the possible values that can hold this data like: cr2 tag
+    // TODO can get that from other tags
     val shutterSpeedPath = xp"//@ExposureTime"
     val shutterSpeedStr = unliftOrError(xmpAsString.evalXPath[String](shutterSpeedPath))
     calculateFromRationalNumber(shutterSpeedStr)
@@ -62,6 +64,7 @@ class XmpService(default: Default,
 
   private def getISO(xmpAsString: String): Int = {
     import kantan.xpath.implicits._
+    // TODO consider all the possible values that can hold this data like: cr2 tag
     val isoPath = xp"//ISOSpeedRatings/Seq/li[1]"
     val xPathResult = xmpAsString.evalXPath[Int](isoPath)
     unliftOrError(xPathResult)
@@ -69,24 +72,30 @@ class XmpService(default: Default,
 
   private def getAperture(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
+    // TODO consider all the possible values that can hold this data like: cr2 tag
+    // TODO Can calculate from FNumber if that exists
     val aperturePath = xp"//@ApertureValue"
-
-    def evalAperture: BigDecimal = {
-      if (default.manualLens) {
-        default.aperture
-      } else {
+    default.aperture match {
+      case Some(aperture) => aperture
+      case None => {
         val apertureStr = xmpAsString.evalXPath[String](aperturePath)
         calculateFromRationalNumber(unliftOrError(apertureStr))
       }
     }
-    evalAperture
   }
 
   private def getExposureBias(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
+    // TODO consider all the possible values that can hold this data like: cr2 tag
     val biasPath = xp"//@ExposureBiasValue"
-    val biasStr = unliftOrError(xmpAsString.evalXPath[String](biasPath))
-    calculateFromRationalNumber(biasStr)
+    default.exposureBias match {
+      case Some(bias) => bias
+      case None => {
+        val biasStr = unliftOrError(xmpAsString.evalXPath[String](biasPath))
+        calculateFromRationalNumber(biasStr)
+      }
+    }
+
   }
 
   private def unliftOrError[T](result: XPathResult[T]): T = result match {
