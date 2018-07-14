@@ -1,4 +1,4 @@
-package hu.szigyi.timelapse.ramping.fs
+package hu.szigyi.timelapse.ramping.io
 
 import java.io.File
 
@@ -7,9 +7,9 @@ import hu.szigyi.timelapse.ramping.conf.ImagesConfig
 
 import scala.io.Source
 
-class Reader(imagesConfig: ImagesConfig, fsUtil: FsUtil) extends LazyLogging {
+class Reader(imagesConfig: ImagesConfig, fsUtil: IOUtil) extends LazyLogging {
 
-  def readFilesFromDirectory(dir: String): List[File] = {
+  def listFilesFromDirectory(dir: String, supportedExtensions: List[String]): List[File] = {
     val d = new File(dir)
     if (!d.exists) {
       throw new NoSuchElementException(s"Folder does not exist: $dir")
@@ -18,7 +18,7 @@ class Reader(imagesConfig: ImagesConfig, fsUtil: FsUtil) extends LazyLogging {
       throw new NoSuchElementException(s"It is not a folder: $dir")
 
     } else {
-      d.listFiles(fsUtil.filterImages(imagesConfig))
+      d.listFiles(fsUtil.filterByExtensions(supportedExtensions))
         .filter(_.isFile)
         .sortWith((f1, f2) => f1.getName < f2.getName)
         .toList
@@ -31,5 +31,5 @@ class Reader(imagesConfig: ImagesConfig, fsUtil: FsUtil) extends LazyLogging {
 }
 
 object Reader {
-  def apply(imagesConfig: ImagesConfig, fsUtil: FsUtil): Reader = new Reader(imagesConfig, fsUtil)
+  def apply(imagesConfig: ImagesConfig, fsUtil: IOUtil): Reader = new Reader(imagesConfig, fsUtil)
 }

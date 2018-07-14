@@ -3,9 +3,11 @@ package hu.szigyi.timelapse.ramping.service
 import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
+import hu.szigyi.timelapse.ramping.algo.RampMirrorPrevious
+import hu.szigyi.timelapse.ramping.math.BigDecimalContext._
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.conf.Default
-import hu.szigyi.timelapse.ramping.fs.{FsUtil, Reader}
+import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader}
 import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
 import kantan.xpath.{XPathError, XPathResult}
 //import com.drew.imaging.ImageMetadataReader
@@ -13,8 +15,11 @@ import kantan.xpath.{XPathError, XPathResult}
 
 class XmpService(default: Default,
                  cli: CLI,
-                 fsUtil: FsUtil,
-                 reader: Reader) extends LazyLogging {
+                 fsUtil: IOUtil,
+                 reader: Reader,
+                 rampMirrorPrevious: RampMirrorPrevious) extends LazyLogging {
+
+  def ramp(standard: XMP, image: XMP): XMP = rampMirrorPrevious.ramp(standard, image)
 
   def getXMP(imageFile: File): XMP = {
     val xmpFile = fsUtil.replaceExtension(imageFile, ".xmp")
@@ -23,17 +28,18 @@ class XmpService(default: Default,
   }
 
   private def getOrCreate(imageFile: File, xmpFile: File): String = {
-    if (reader.isExists(xmpFile)) {
-      reader.readFile(xmpFile)
-    } else {
-      createXMP(imageFile)
+    if (!reader.isExists(xmpFile)) {
+      createXMP(imageFile, xmpFile)
     }
+    reader.readFile(xmpFile)
   }
 
-  private def createXMP(imageFile: File): String = {
-    val name = imageFile.getName
-    logger.debug(s"Creating XMP for $name")
-    cli.exec(fsUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-xmp", "-b", name))
+  private def createXMP(imageFile: File, xmpFile: File): String = {
+    val imageName = imageFile.getName
+    val xmpName = xmpFile.getName
+    logger.debug(s"Creating XMP for $imageName")
+//    cli.exec(fsUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-xmp", "-b", imageName))
+    cli.exec(fsUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-Tagsfromfile", imageName, xmpName))
   }
 
   private def parseXMP(xmpFile: File, xmpAsString: String): XMP = {
@@ -57,29 +63,30 @@ class XmpService(default: Default,
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
     // TODO can get that from other tags
-    val shutterSpeedPath = xp"//@ExposureTime"
-    val shutterSpeedStr = unliftOrError(xmpAsString.evalXPath[String](shutterSpeedPath))
+    val shutterSpeedPath = xp"//*[local-name()='ExposureTime']"
+    val shutterSpeedStr = unliftOrError(xmpAsString.evalXPath[String](shutterSpeedPath),
+      s"ExposureTime is not found in the XMP")
     calculateFromRationalNumber(shutterSpeedStr)
   }
 
   private def getISO(xmpAsString: String): Int = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
-    val isoPath = xp"//ISOSpeedRatings/Seq/li[1]"
+    val isoPath = xp"//*[local-name()='ISOSpeedRatings']/Seq/li[1]"
     val xPathResult = xmpAsString.evalXPath[Int](isoPath)
-    unliftOrError(xPathResult)
+    unliftOrError(xPathResult, s"ISOSpeedRatings is not found in the XMP")
   }
 
   private def getAperture(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
     // TODO Can calculate from FNumber if that exists
-    val aperturePath = xp"//@ApertureValue"
+    val aperturePath = xp"//*[local-name()='ApertureValue']"
     default.aperture match {
       case Some(aperture) => aperture
       case None => {
         val apertureStr = xmpAsString.evalXPath[String](aperturePath)
-        calculateFromRationalNumber(unliftOrError(apertureStr))
+        calculateFromRationalNumber(unliftOrError(apertureStr, s"ApertureValue is not found in the XMP"))
       }
     }
   }
@@ -87,26 +94,27 @@ class XmpService(default: Default,
   private def getExposureBias(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
-    val biasPath = xp"//@ExposureBiasValue"
+    val biasPath = xp"//*[local-name()='ExposureBiasValue']"
     default.exposureBias match {
       case Some(bias) => bias
       case None => {
-        val biasStr = unliftOrError(xmpAsString.evalXPath[String](biasPath))
+        val biasStr = unliftOrError(xmpAsString.evalXPath[String](biasPath),
+          s"ExposureBiasValue is not found in the XMP")
         calculateFromRationalNumber(biasStr)
       }
     }
 
   }
 
-  private def unliftOrError[T](result: XPathResult[T]): T = result match {
+  private def unliftOrError[T](result: XPathResult[T], errorReason: String): T = result match {
     case Right(r) => r
-    case Left(error: XPathError) => throw error
+    case Left(error: XPathError) => throw new RuntimeException(errorReason, error)
   }
 
   private def calculateFromRationalNumber(str: String): BigDecimal = {
     val nomDom = str.split("/")
-    val numerator = BigDecimal(nomDom(0).toInt)
-    val denominator = BigDecimal(nomDom(1).toInt)
+    val numerator = BigDecimal(nomDom(0).toInt, mathContext)
+    val denominator = BigDecimal(nomDom(1).toInt, mathContext)
     numerator / denominator
   }
 }
@@ -114,6 +122,7 @@ class XmpService(default: Default,
 object XmpService {
   def apply(default: Default,
             cli: CLI,
-            fsUtil: FsUtil,
-            reader: Reader): XmpService = new XmpService(default, cli, fsUtil, reader)
+            fsUtil: IOUtil,
+            reader: Reader,
+            rampMirrorPrevious: RampMirrorPrevious): XmpService = new XmpService(default, cli, fsUtil, reader, rampMirrorPrevious)
 }

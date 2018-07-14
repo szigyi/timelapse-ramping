@@ -8,14 +8,16 @@ import hu.szigyi.timelapse.ramping.service.XmpService
 class StepByStep(xmpService: XmpService) extends LazyLogging {
 
   def run(standard: File, image: File): Unit = {
-    logger.info(s"Getting XMP files for Standard (${standard.getName}) and next (${image.getName}) images...")
+    logger.info(s"Using '${standard.getName}' to ramp '${image.getName}'")
     val standardXmp = xmpService.getXMP(standard)
     val xmp = xmpService.getXMP(image)
-    logger.info(s"Standard: $standardXmp")
-
 
     // TODO Applying the Ramping on the second 'file' from the one
+    val rampedXMP = xmpService.ramp(standardXmp, xmp)
+    logger.info(s"Original: $xmp")
+    logger.info(s"Ramped  : $rampedXMP")
     // TODO Save the Ramped xmp file
+
   }
 }
 
