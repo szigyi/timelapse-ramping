@@ -14,9 +14,10 @@ object Main extends App with LazyLogging with ComponentFactory {
   logger.info(s"Reading all the files...")
   private val files: List[File] = reader.listFilesFromDirectory(dir, imagesConfig.supportedFileExtensions)
   logger.info(s"Found ${files.size} images")
+  private val shiftingWindow = 1
+  private val shiftedFiles = files.drop(shiftingWindow)
 
-  for ((standard, image) <- files.zip(files.drop(1))) {
-    val step = StepByStep(xmpService)
-    step.run(standard, image)
-  }
+  private val filesTuple = files.zip(shiftedFiles)
+  private val step = StepByStep(xmpService)
+  filesTuple.foreach(tuple => step.run(tuple._1, tuple._2))
 }
