@@ -12,10 +12,10 @@ import kantan.xpath.{XPathError, XPathResult}
 //import com.drew.imaging.ImageMetadataReader
 //import com.drew.metadata.Metadata
 
-class XmpService(default: Default,
-                 cli: CLI,
+class XmpService(cli: CLI,
                  fsUtil: IOUtil,
                  reader: Reader,
+                 xmpParser: XmpParser,
                  rampMirrorPrevious: MirrorPrevious) extends LazyLogging {
 
   def ramp(standard: XMP, image: XMP): XMP = rampMirrorPrevious.ramp(standard, image)
@@ -50,15 +50,26 @@ class XmpService(default: Default,
   }
 
   private def parseXMPSettings(xmpAsString: String): XMPSettings = {
-    val exposure = getShutterSpeed(xmpAsString)
-    val iso = getISO(xmpAsString)
-    val aperture = getAperture(xmpAsString)
-    val bias = getExposureBias(xmpAsString)
+    val shutterSpeed = xmpParser.getShutterSpeed(xmpAsString)
+    val aperture = xmpParser.getAperture(xmpAsString)
+    val bias = xmpParser.getExposureBias(xmpAsString)
+    val iso = xmpParser.getISO(xmpAsString)
 
-    XMPSettings(iso, exposure, aperture, bias)
+    XMPSettings(iso, shutterSpeed, aperture, bias)
   }
+}
 
-  private def getShutterSpeed(xmpAsString: String): BigDecimal = {
+object XmpService {
+  def apply(cli: CLI,
+            fsUtil: IOUtil,
+            reader: Reader,
+            xmpParser: XmpParser,
+            rampMirrorPrevious: MirrorPrevious): XmpService = new XmpService(cli, fsUtil, reader, xmpParser, rampMirrorPrevious)
+}
+
+class XmpParser(default: Default) {
+
+  def getShutterSpeed(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
     // TODO can get that from other tags
@@ -68,7 +79,7 @@ class XmpService(default: Default,
     calculateFromRationalNumber(shutterSpeedStr)
   }
 
-  private def getISO(xmpAsString: String): Int = {
+  def getISO(xmpAsString: String): Int = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
     val isoPath = xp"//*[local-name()='ISOSpeedRatings']/Seq/li[1]"
@@ -76,7 +87,7 @@ class XmpService(default: Default,
     unliftOrError(xPathResult, s"ISOSpeedRatings is not found in the XMP")
   }
 
-  private def getAperture(xmpAsString: String): BigDecimal = {
+  def getAperture(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
     // TODO Can calculate from FNumber if that exists
@@ -85,12 +96,13 @@ class XmpService(default: Default,
       case Some(aperture) => aperture
       case None => {
         val apertureStr = xmpAsString.evalXPath[String](aperturePath)
-        calculateFromRationalNumber(unliftOrError(apertureStr, s"ApertureValue is not found in the XMP"))
+        val aperture = unliftOrError(apertureStr, s"ApertureValue is not found in the XMP")
+        calculateFromRationalNumber(aperture)
       }
     }
   }
 
-  private def getExposureBias(xmpAsString: String): BigDecimal = {
+  def getExposureBias(xmpAsString: String): BigDecimal = {
     import kantan.xpath.implicits._
     // TODO consider all the possible values that can hold this data like: cr2 tag
     val biasPath = xp"//*[local-name()='ExposureBiasValue']"
@@ -102,7 +114,6 @@ class XmpService(default: Default,
         calculateFromRationalNumber(biasStr)
       }
     }
-
   }
 
   private def unliftOrError[T](result: XPathResult[T], errorReason: String): T = result match {
@@ -119,10 +130,6 @@ class XmpService(default: Default,
   }
 }
 
-object XmpService {
-  def apply(default: Default,
-            cli: CLI,
-            fsUtil: IOUtil,
-            reader: Reader,
-            rampMirrorPrevious: MirrorPrevious): XmpService = new XmpService(default, cli, fsUtil, reader, rampMirrorPrevious)
+object XmpParser {
+  def apply(default: Default): XmpParser = new XmpParser(default)
 }

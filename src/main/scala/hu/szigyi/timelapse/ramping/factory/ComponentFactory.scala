@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.algo.{Equations, ExposureBias, MirrorPrevious}
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader}
-import hu.szigyi.timelapse.ramping.service.XmpService
+import hu.szigyi.timelapse.ramping.service.{XmpParser, XmpService}
 
 trait ComponentFactory extends LazyLogging with ConfigurationFactory {
 
@@ -16,5 +16,6 @@ trait ComponentFactory extends LazyLogging with ConfigurationFactory {
   private val exposureBias = ExposureBias(equations)
   val rampAlgo = MirrorPrevious(exposureBias)
 
-  val xmpService = XmpService(defaultConfig, cli, fsUtil, reader, rampAlgo)
+  val xmpParser = XmpParser(defaultConfig)
+  val xmpService = XmpService(cli, fsUtil, reader, xmpParser, rampAlgo)
 }
