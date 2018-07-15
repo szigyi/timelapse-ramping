@@ -2,8 +2,10 @@ package hu.szigyi.timelapse.ramping.model
 
 import java.io.File
 
+import com.drew.metadata.Metadata
+
 case class XMP(xmpFilePath: File,
-               content: String,
+               metadata: Metadata,
                settings: XMPSettings) {
   override def toString: String =
     s"""

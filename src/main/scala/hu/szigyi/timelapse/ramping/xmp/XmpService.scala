@@ -2,6 +2,9 @@ package hu.szigyi.timelapse.ramping.xmp
 
 import java.io.File
 
+import com.drew.imaging.ImageMetadataReader._
+import com.drew.metadata.Metadata
+import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.algo.MirrorPrevious
 import hu.szigyi.timelapse.ramping.cli.CLI
@@ -16,9 +19,8 @@ class XmpService(cli: CLI,
                  writer: Writer) extends LazyLogging {
 
   def getXMP(imageFile: File): XMP = {
-    val xmpFile = ioUtil.replaceExtension(imageFile, ".xmp")
-    val xmpAsString = getOrCreate(imageFile, xmpFile)
-    parseXMP(xmpFile, xmpAsString)
+    val metadata: Metadata = readMetadata(imageFile)
+    parseXMP(imageFile, metadata)
   }
 
   def ramp(standard: XMP, image: XMP): XMP = rampMirrorPrevious.ramp(standard, image)
@@ -27,44 +29,41 @@ class XmpService(cli: CLI,
     val exposureTag = s"<crs:Exposure2012>${xmp.settings.exposure}</crs:Exposure2012>"
     if (xmp.settings.exposureExistsInXMP) {
       // Update
-      val updatedXMP = xmp.content.replaceFirst("<crs:Exposure2012>(.*)</crs:Exposure2012>", exposureTag)
-      writer.write(xmp.xmpFilePath, updatedXMP)
+//      val updatedXMP = xmp.content.replaceFirst("<crs:Exposure2012>(.*)</crs:Exposure2012>", exposureTag)
+//      writer.write(xmp.xmpFilePath, updatedXMP)
     } else {
       // Add
       val beginningOfCRS = "xmlns:crs.*[^>]>{1}(\\s)<"
-      val addedXMP = xmp.content.replaceFirst(beginningOfCRS, exposureTag)
-      writer.write(xmp.xmpFilePath, addedXMP)
+//      val addedXMP = xmp.content.replaceFirst(beginningOfCRS, exposureTag)
+//      writer.write(xmp.xmpFilePath, addedXMP)
     }
   }
 
-  private def getOrCreate(imageFile: File, xmpFile: File): String = {
-    if (!reader.isExists(xmpFile)) {
-      createXMP(imageFile, xmpFile)
+  private def parseXMP(imageFile: File, metadata: Metadata) = {
+    val exifDir = metadata.getFirstDirectoryOfType(classOf[ExifSubIFDDirectory])
+    if (null == exifDir) {
+      throw new RuntimeException(
+        s"""
+           |FATAL ERROR
+           |There is no EXIF information in the given picture!
+           |${imageFile.getAbsolutePath}
+           |
+           |Cannot proceed because to set any metadata it requires to have any metadata (EXIF) for the picture.
+           """.stripMargin)
     }
-    reader.readFile(xmpFile)
+
+    val xmpFile = ioUtil.replaceExtension(imageFile, ".xmp")
+    val xmpSettings = parseXMPSettings(exifDir)
+    logger.info(xmpSettings.toString)
+    XMP(xmpFile, metadata, xmpSettings)
   }
 
-  private def createXMP(imageFile: File, xmpFile: File): String = {
-    val imageName = imageFile.getName
-    val xmpName = xmpFile.getName
-    logger.debug(s"Creating XMP for $imageName")
-//    cli.exec(fsUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-xmp", "-b", imageName))
-    cli.exec(ioUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-Tagsfromfile", imageName, xmpName))
-  }
+  private def parseXMPSettings(exifDir: ExifSubIFDDirectory): XMPSettings = {
 
-  private def parseXMP(xmpFile: File, xmpAsString: String): XMP = {
-    //    val metadata: Metadata = ImageMetadataReader.readMetadata(file)
-    val settings = parseXMPSettings(xmpAsString)
-    // TODO parse necessary settings and validate them!!!!!! else throw exception
-    // TODO validate it and throw exception if there is no value!
-    XMP(xmpFile, xmpAsString, settings)
-  }
-
-  private def parseXMPSettings(xmpAsString: String): XMPSettings = {
-    val shutterSpeed = xmpParser.getShutterSpeed(xmpAsString)
-    val aperture = xmpParser.getAperture(xmpAsString)
-    val (exposure, isExists) = xmpParser.getExposure(xmpAsString)
-    val iso = xmpParser.getISO(xmpAsString)
+    val shutterSpeed = xmpParser.getShutterSpeed(exifDir)
+    val aperture = xmpParser.getAperture(exifDir)
+    val (exposure, isExists) = xmpParser.getExposure(exifDir)
+    val iso = xmpParser.getISO(exifDir)
 
     XMPSettings(iso, shutterSpeed, aperture, exposure, isExists)
   }
