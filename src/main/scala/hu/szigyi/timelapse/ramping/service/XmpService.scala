@@ -3,8 +3,7 @@ package hu.szigyi.timelapse.ramping.service
 import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.algo.RampMirrorPrevious
-import hu.szigyi.timelapse.ramping.math.BigDecimalContext._
+import hu.szigyi.timelapse.ramping.algo.MirrorPrevious
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.conf.Default
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader}
@@ -17,7 +16,7 @@ class XmpService(default: Default,
                  cli: CLI,
                  fsUtil: IOUtil,
                  reader: Reader,
-                 rampMirrorPrevious: RampMirrorPrevious) extends LazyLogging {
+                 rampMirrorPrevious: MirrorPrevious) extends LazyLogging {
 
   def ramp(standard: XMP, image: XMP): XMP = rampMirrorPrevious.ramp(standard, image)
 
@@ -112,9 +111,10 @@ class XmpService(default: Default,
   }
 
   private def calculateFromRationalNumber(str: String): BigDecimal = {
-    val nomDom = str.split("/")
-    val numerator = BigDecimal(nomDom(0).toInt, mathContext)
-    val denominator = BigDecimal(nomDom(1).toInt, mathContext)
+    import math.BigDecimal._
+    val numDen = str.split("/")
+    val numerator = BigDecimal(numDen(0), defaultMathContext)
+    val denominator = BigDecimal(numDen(1), defaultMathContext)
     numerator / denominator
   }
 }
@@ -124,5 +124,5 @@ object XmpService {
             cli: CLI,
             fsUtil: IOUtil,
             reader: Reader,
-            rampMirrorPrevious: RampMirrorPrevious): XmpService = new XmpService(default, cli, fsUtil, reader, rampMirrorPrevious)
+            rampMirrorPrevious: MirrorPrevious): XmpService = new XmpService(default, cli, fsUtil, reader, rampMirrorPrevious)
 }

@@ -2,28 +2,23 @@ package hu.szigyi.timelapse.ramping.math
 
 import java.math.MathContext
 
-import scala.math.BigDecimal.RoundingMode
 import scala.math.BigDecimal.RoundingMode.RoundingMode
-
-object BigDecimalContext {
-  val mathContext: MathContext = MathContext(8, java.math.RoundingMode.HALF_UP)
-}
 
 object MathContext {
   def apply(precision: Int, roundMode: java.math.RoundingMode) = new MathContext(precision, roundMode)
 }
 
 object BigDecimalConverter {
+  import math.BigDecimal._
   implicit def convertToJava(bigDecimal: BigDecimal): java.math.BigDecimal = bigDecimal.bigDecimal
-  implicit def convertToScala(bigDecimal: java.math.BigDecimal): BigDecimal = BigDecimal(bigDecimal)
-  implicit def convertFromInt(int: Int): java.math.BigDecimal = new java.math.BigDecimal(int)
+  implicit def convertFromInt(int: Int): java.math.BigDecimal = new java.math.BigDecimal(int, defaultMathContext)
 }
 
 object BigDecimalEquals {
-  import BigDecimalContext._
+  import math.BigDecimal._
   def bdEquals(bd1: BigDecimal, bd2: BigDecimal): Boolean = {
-    val scaledBD1 = bd1.setScale(mathContext.getPrecision, mathContext.getRoundingMode)
-    val scaledBD2 = bd2.setScale(mathContext.getPrecision, mathContext.getRoundingMode)
+    val scaledBD1 = bd1.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
+    val scaledBD2 = bd2.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
     scaledBD1.equals(scaledBD2)
   }
 

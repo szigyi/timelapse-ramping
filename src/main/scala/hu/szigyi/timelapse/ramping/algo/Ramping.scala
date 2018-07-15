@@ -5,23 +5,23 @@ import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
 class Equations {
 
   import scala.math._
+  import math.BigDecimal._
   import ch.obermuhlner.math.big.BigDecimalMath
-  import hu.szigyi.timelapse.ramping.math.BigDecimalContext._
   import hu.szigyi.timelapse.ramping.math.BigDecimalConverter._
 
   def shutterSpeeds(ss1: BigDecimal, ss2: BigDecimal): BigDecimal = {
     val div = ss1 / ss2
-    BigDecimalMath.log2(div, mathContext)
+    BigDecimalMath.log2(div, defaultMathContext)
   }
 
   def apertures(a1: BigDecimal, a2: BigDecimal): BigDecimal = {
     val div = a1 / a2
-    BigDecimalMath.log(div, mathContext) / log(sqrt(2))
+    BigDecimalMath.log(div, defaultMathContext) / log(sqrt(2))
   }
 
   def ISOs(i1: Int, i2: Int): BigDecimal = {
     val div = i1 / i2
-    BigDecimalMath.log2(div, mathContext)
+    BigDecimalMath.log2(div, defaultMathContext)
   }
 }
 
@@ -65,7 +65,7 @@ object ExposureBias {
   def apply(equations: Equations): ExposureBias = new ExposureBias(equations)
 }
 
-class RampMirrorPrevious(exposureBias: ExposureBias) {
+class MirrorPrevious(exposureBias: ExposureBias) {
   def ramp(standard: XMP, image: XMP): XMP = {
     val shutterBias = exposureBias.shutterSpeeds(standard.settings, image.settings)
     val apertureBias = exposureBias.apertures(standard.settings, image.settings)
@@ -84,11 +84,11 @@ class RampMirrorPrevious(exposureBias: ExposureBias) {
   }
 }
 
-object RampMirrorPrevious {
-  def apply(exposureBias: ExposureBias): RampMirrorPrevious = new RampMirrorPrevious(exposureBias)
+object MirrorPrevious {
+  def apply(exposureBias: ExposureBias): MirrorPrevious = new MirrorPrevious(exposureBias)
 }
 
-class RampAverageWindow(avgCount: Int) {
+class AverageWindow(avgCount: Int) {
 
   def ramp(images: List[XMP]): Unit = {
 
