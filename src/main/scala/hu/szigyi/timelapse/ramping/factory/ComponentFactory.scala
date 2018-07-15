@@ -9,8 +9,8 @@ import hu.szigyi.timelapse.ramping.xmp.{XmpParser, XmpService}
 
 trait ComponentFactory extends LazyLogging with ConfigurationFactory {
 
-  val fsUtil = IOUtil()
-  val reader = Reader(fsUtil)
+  val ioUtil = IOUtil()
+  val reader = Reader(ioUtil)
   val writer = Writer()
   val cli = CLI()
 
@@ -19,7 +19,7 @@ trait ComponentFactory extends LazyLogging with ConfigurationFactory {
   val rampAlgo = MirrorPrevious(exposureAlgo)
 
   val xmpParser = XmpParser(defaultConfig)
-  val xmpService = XmpService(cli, fsUtil, reader, xmpParser, rampAlgo, writer)
+  val xmpService = XmpService(cli, ioUtil, reader, xmpParser, rampAlgo, writer)
 
   val stepByStep = StepByStep(xmpService)
 }

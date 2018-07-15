@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source
 
-class Reader(fsUtil: IOUtil) extends LazyLogging {
+class Reader(ioUtil: IOUtil) extends LazyLogging {
 
   def listFilesFromDirectory(dir: String, supportedExtensions: List[String]): List[File] = {
     val d = new File(dir)
@@ -17,7 +17,7 @@ class Reader(fsUtil: IOUtil) extends LazyLogging {
       throw new NoSuchElementException(s"It is not a folder: $dir")
 
     } else {
-      d.listFiles(fsUtil.filterByExtensions(supportedExtensions))
+      d.listFiles(ioUtil.filterByExtensions(supportedExtensions))
         .filter(_.isFile)
         .sortWith((f1, f2) => f1.getName < f2.getName)
         .toList
@@ -30,5 +30,5 @@ class Reader(fsUtil: IOUtil) extends LazyLogging {
 }
 
 object Reader {
-  def apply(fsUtil: IOUtil): Reader = new Reader(fsUtil)
+  def apply(ioUtil: IOUtil): Reader = new Reader(ioUtil)
 }

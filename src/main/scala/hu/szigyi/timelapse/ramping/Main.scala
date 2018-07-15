@@ -11,7 +11,7 @@ object Main extends App with LazyLogging with ComponentFactory {
   // TODO parsing program arguments - folder of the pictures
   private val dir = "/Users/szabolcs/jumping_sunset/"
 
-  logger.info(s"Reading all the files...")
+  logger.info(s"Listing all the images ...")
   private val files: List[File] = reader.listFilesFromDirectory(dir, imagesConfig.supportedFileExtensions)
   logger.info(s"Found ${files.size} images")
   private val shiftingWindow = 1

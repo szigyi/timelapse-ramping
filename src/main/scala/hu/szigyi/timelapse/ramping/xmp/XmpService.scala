@@ -9,14 +9,14 @@ import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
 import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
 
 class XmpService(cli: CLI,
-                 fsUtil: IOUtil,
+                 ioUtil: IOUtil,
                  reader: Reader,
                  xmpParser: XmpParser,
                  rampMirrorPrevious: MirrorPrevious,
                  writer: Writer) extends LazyLogging {
 
   def getXMP(imageFile: File): XMP = {
-    val xmpFile = fsUtil.replaceExtension(imageFile, ".xmp")
+    val xmpFile = ioUtil.replaceExtension(imageFile, ".xmp")
     val xmpAsString = getOrCreate(imageFile, xmpFile)
     parseXMP(xmpFile, xmpAsString)
   }
@@ -49,7 +49,7 @@ class XmpService(cli: CLI,
     val xmpName = xmpFile.getName
     logger.debug(s"Creating XMP for $imageName")
 //    cli.exec(fsUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-xmp", "-b", imageName))
-    cli.exec(fsUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-Tagsfromfile", imageName, xmpName))
+    cli.exec(ioUtil.workingDirectoryOf(imageFile), Seq("exiftool", "-Tagsfromfile", imageName, xmpName))
   }
 
   private def parseXMP(xmpFile: File, xmpAsString: String): XMP = {
@@ -72,9 +72,9 @@ class XmpService(cli: CLI,
 
 object XmpService {
   def apply(cli: CLI,
-            fsUtil: IOUtil,
+            ioUtil: IOUtil,
             reader: Reader,
             xmpParser: XmpParser,
             rampMirrorPrevious: MirrorPrevious,
-            writer: Writer): XmpService = new XmpService(cli, fsUtil, reader, xmpParser, rampMirrorPrevious, writer)
+            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, rampMirrorPrevious, writer)
 }
