@@ -15,13 +15,16 @@ object BigDecimalConverter {
 }
 
 object BigDecimalEquals {
-
   import math.BigDecimal._
 
-  def bdEquals(bd1: BigDecimal, bd2: BigDecimal): Boolean = {
-    val scaledBD1 = bd1.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
-    val scaledBD2 = bd2.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
-    scaledBD1.equals(scaledBD2)
+  implicit def decorateBigDecimal(bigDecimal: BigDecimal): BigDecimalExt = BigDecimalExt(bigDecimal)
+
+  sealed case class BigDecimalExt(bd1: BigDecimal) {
+    def ===(bd2: BigDecimal): Boolean = {
+      val scaledBD1 = bd1.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
+      val scaledBD2 = bd2.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
+      scaledBD1.equals(scaledBD2)
+    }
   }
 
   private implicit def roundingModeConverter(roundingMode: JavaRoundingMode): RoundingMode = roundingMode match {

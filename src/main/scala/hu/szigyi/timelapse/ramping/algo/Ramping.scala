@@ -36,7 +36,7 @@ class ExposureBias(equations: Equations) {
   private def neg(bigDecimal: BigDecimal): BigDecimal = bigDecimal * -1
 
   def shutterSpeeds(standard: XMPSettings, image: XMPSettings): Option[BigDecimal] = {
-    if (bdEquals(standard.shutterSpeed, image.shutterSpeed)) {
+    if (standard.shutterSpeed === image.shutterSpeed) {
       None
     } else if (standard.shutterSpeed > image.shutterSpeed) {
       Some(neg(equations.shutterSpeeds(standard.shutterSpeed, image.shutterSpeed)))
@@ -46,7 +46,7 @@ class ExposureBias(equations: Equations) {
   }
 
   def apertures(standard: XMPSettings, image: XMPSettings): Option[BigDecimal] = {
-    if (bdEquals(standard.aperture, image.aperture)) None
+    if (standard.aperture === image.aperture) None
     else Some(equations.apertures(standard.aperture, image.aperture))
   }
 
