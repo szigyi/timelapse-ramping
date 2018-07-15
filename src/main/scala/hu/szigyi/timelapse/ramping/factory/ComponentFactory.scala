@@ -1,21 +1,25 @@
 package hu.szigyi.timelapse.ramping.factory
 
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.algo.{Equations, ExposureBias, MirrorPrevious}
+import hu.szigyi.timelapse.ramping.StepByStep
+import hu.szigyi.timelapse.ramping.algo.{Equations, ExposureAlgorithm, MirrorPrevious}
 import hu.szigyi.timelapse.ramping.cli.CLI
-import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader}
-import hu.szigyi.timelapse.ramping.service.{XmpParser, XmpService}
+import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
+import hu.szigyi.timelapse.ramping.xmp.{XmpParser, XmpService}
 
 trait ComponentFactory extends LazyLogging with ConfigurationFactory {
 
   val fsUtil = IOUtil()
-  val reader = Reader(imagesConfig, fsUtil)
+  val reader = Reader(fsUtil)
+  val writer = Writer()
   val cli = CLI()
 
   private val equations = Equations()
-  private val exposureBias = ExposureBias(equations)
-  val rampAlgo = MirrorPrevious(exposureBias)
+  private val exposureAlgo = ExposureAlgorithm(equations)
+  val rampAlgo = MirrorPrevious(exposureAlgo)
 
   val xmpParser = XmpParser(defaultConfig)
-  val xmpService = XmpService(cli, fsUtil, reader, xmpParser, rampAlgo)
+  val xmpService = XmpService(cli, fsUtil, reader, xmpParser, rampAlgo, writer)
+
+  val stepByStep = StepByStep(xmpService)
 }

@@ -3,11 +3,10 @@ package hu.szigyi.timelapse.ramping.io
 import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.conf.ImagesConfig
 
 import scala.io.Source
 
-class Reader(imagesConfig: ImagesConfig, fsUtil: IOUtil) extends LazyLogging {
+class Reader(fsUtil: IOUtil) extends LazyLogging {
 
   def listFilesFromDirectory(dir: String, supportedExtensions: List[String]): List[File] = {
     val d = new File(dir)
@@ -31,5 +30,5 @@ class Reader(imagesConfig: ImagesConfig, fsUtil: IOUtil) extends LazyLogging {
 }
 
 object Reader {
-  def apply(imagesConfig: ImagesConfig, fsUtil: IOUtil): Reader = new Reader(imagesConfig, fsUtil)
+  def apply(fsUtil: IOUtil): Reader = new Reader(fsUtil)
 }

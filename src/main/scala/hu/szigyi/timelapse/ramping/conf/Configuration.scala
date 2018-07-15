@@ -1,11 +1,21 @@
 package hu.szigyi.timelapse.ramping.conf
 
-case class Configuration(timelapseRamping: TimelapseRamping)
+// reference.conf
+case class ReferenceConfiguration(metadata: MetadataConfig)
 
-case class TimelapseRamping(imagesConfig: ImagesConfig,
-                            default: Default)
+case class MetadataConfig(appName: String,
+                          version: VersionConfig)
+
+case class VersionConfig(major: Int, minor: Int, micro: Int)
+
+
+// application.conf
+case class ApplicationConfiguration(timelapseRamping: TimelapseRampingConfig)
+
+case class TimelapseRampingConfig(imagesConfig: ImagesConfig,
+                                  default: DefaultConfig)
 
 case class ImagesConfig(supportedFileExtensions: List[String])
 
-case class Default(aperture: Option[BigDecimal],
-                   exposureBias: Option[BigDecimal])
+case class DefaultConfig(aperture: Option[BigDecimal],
+                         exposure: BigDecimal)

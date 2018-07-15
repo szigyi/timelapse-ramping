@@ -9,7 +9,7 @@ Information that is necessary to have in the raw image or in the sidecar (XMP) f
 
 Information that not necessary but user should provide is they are missing:
    * Aperture
-   * Exposure Bias
+   * Exposure
 
 ## Caveats
    * If you exported the XMP files by other than Lightroom, then this app may can not recognize the EXIF values. I'm working on it to handle all the possible EXIF data to get the basic data.

@@ -18,6 +18,5 @@ object Main extends App with LazyLogging with ComponentFactory {
   private val shiftedFiles = files.drop(shiftingWindow)
 
   private val filesTuple = files.zip(shiftedFiles)
-  private val step = StepByStep(xmpService)
-  filesTuple.foreach(tuple => step.run(tuple._1, tuple._2))
+  filesTuple.foreach(tuple => stepByStep.run(tuple._1, tuple._2))
 }

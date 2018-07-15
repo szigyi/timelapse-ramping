@@ -3,7 +3,7 @@ package hu.szigyi.timelapse.ramping
 import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.service.XmpService
+import hu.szigyi.timelapse.ramping.xmp.XmpService
 
 class StepByStep(xmpService: XmpService) extends LazyLogging {
 
@@ -17,7 +17,9 @@ class StepByStep(xmpService: XmpService) extends LazyLogging {
     logger.info(s"Original: $xmp")
     logger.info(s"Ramped  : $rampedXMP")
     // TODO Save the Ramped xmp file
-
+    if (!xmp.equals(rampedXMP)) {
+      xmpService.flushRampedXMP(rampedXMP)
+    }
   }
 }
 

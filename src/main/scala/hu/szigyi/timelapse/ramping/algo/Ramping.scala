@@ -29,7 +29,7 @@ object Equations {
   def apply(): Equations = new Equations()
 }
 
-class ExposureBias(equations: Equations) {
+class ExposureAlgorithm(equations: Equations) {
 
   import hu.szigyi.timelapse.ramping.math.BigDecimalEquals._
 
@@ -61,20 +61,21 @@ class ExposureBias(equations: Equations) {
   }
 }
 
-object ExposureBias {
-  def apply(equations: Equations): ExposureBias = new ExposureBias(equations)
+object ExposureAlgorithm {
+  def apply(equations: Equations): ExposureAlgorithm = new ExposureAlgorithm(equations)
 }
 
-class MirrorPrevious(exposureBias: ExposureBias) {
+class MirrorPrevious(exposureAlgo: ExposureAlgorithm) {
   def ramp(standard: XMP, image: XMP): XMP = {
-    val shutterBias = exposureBias.shutterSpeeds(standard.settings, image.settings)
-    val apertureBias = exposureBias.apertures(standard.settings, image.settings)
-    val isoBias = exposureBias.ISOs(standard.settings, image.settings)
+    val shutterBias = exposureAlgo.shutterSpeeds(standard.settings, image.settings)
+    val apertureBias = exposureAlgo.apertures(standard.settings, image.settings)
+    val isoBias = exposureAlgo.ISOs(standard.settings, image.settings)
 
-    val exposure = standard.settings.exposureBias
-    val rampedExposure = expoAdd(expoAdd(expoAdd(exposure, shutterBias), apertureBias), isoBias)
+    // Copying forward the standard's exposure
+    val standardExposure = standard.settings.exposure
+    val rampedExposure = expoAdd(expoAdd(expoAdd(standardExposure, shutterBias), apertureBias), isoBias)
 
-    val rampedSettings = image.settings.copy(exposureBias = rampedExposure)
+    val rampedSettings = image.settings.copy(exposure = rampedExposure)
     image.copy(settings = rampedSettings)
   }
 
@@ -85,7 +86,7 @@ class MirrorPrevious(exposureBias: ExposureBias) {
 }
 
 object MirrorPrevious {
-  def apply(exposureBias: ExposureBias): MirrorPrevious = new MirrorPrevious(exposureBias)
+  def apply(exposureBias: ExposureAlgorithm): MirrorPrevious = new MirrorPrevious(exposureBias)
 }
 
 class AverageWindow(avgCount: Int) {
