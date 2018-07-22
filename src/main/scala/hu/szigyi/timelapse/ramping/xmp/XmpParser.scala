@@ -16,8 +16,7 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
     */
   def getShutterSpeed(exifDir: ExifSubIFDDirectory): BigDecimal = {
     val errorMsg = "ExposureTime is not found in the image!"
-    val maybeStr = exifDir.getString(ExifDirectoryBase.TAG_EXPOSURE_TIME)
-    val shutterSpeedStr = nullToError(maybeStr, errorMsg)
+    val shutterSpeedStr = nullToError(exifDir.getString(ExifDirectoryBase.TAG_EXPOSURE_TIME), errorMsg)
     rationalToDecimal(shutterSpeedStr)
   }
 
@@ -83,7 +82,7 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
   private def rationalToDecimal(str: String): BigDecimal = {
     import math.BigDecimal._
     /**
-      * If Exposure Time is less than 1/200 then it calculates the decimal value!
+      * If Rational's value in XML is less than 1/200 then it calculates the decimal value!
       * {@link com.drew.lang.Rational#toSimpleString}
       */
     try {

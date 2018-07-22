@@ -66,7 +66,7 @@ object ExposureAlgorithm {
 }
 
 class MirrorPrevious(exposureAlgo: ExposureAlgorithm) {
-  def ramp(standard: XMP, image: XMP): XMP = {
+  def rampExposure(standard: XMP, image: XMP): BigDecimal = {
     val shutterBias = exposureAlgo.shutterSpeeds(standard.settings, image.settings)
     val apertureBias = exposureAlgo.apertures(standard.settings, image.settings)
     val isoBias = exposureAlgo.ISOs(standard.settings, image.settings)
@@ -74,9 +74,9 @@ class MirrorPrevious(exposureAlgo: ExposureAlgorithm) {
     // Copying forward the standard's exposure
     val standardExposure = standard.settings.exposure
     val rampedExposure = expoAdd(expoAdd(expoAdd(standardExposure, shutterBias), apertureBias), isoBias)
-
-    val rampedSettings = image.settings.copy(exposure = rampedExposure)
-    image.copy(settings = rampedSettings)
+    rampedExposure
+//    val rampedSettings = image.settings.copy(exposure = rampedExposure)
+//    image.copy(settings = rampedSettings)
   }
 
   private def expoAdd(expo: BigDecimal, addition: Option[BigDecimal]): BigDecimal = addition match {

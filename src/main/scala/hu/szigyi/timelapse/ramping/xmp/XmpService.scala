@@ -1,10 +1,12 @@
 package hu.szigyi.timelapse.ramping.xmp
 
-import java.io.File
+import java.io.{File, FileOutputStream}
 
 import com.drew.imaging.ImageMetadataReader._
 import com.drew.metadata.Metadata
 import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
+import com.drew.metadata.xmp.XmpWriter
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.algo.MirrorPrevious
 import hu.szigyi.timelapse.ramping.cli.CLI
@@ -23,20 +25,22 @@ class XmpService(cli: CLI,
     parseXMP(imageFile, metadata)
   }
 
-  def ramp(standard: XMP, image: XMP): XMP = rampMirrorPrevious.ramp(standard, image)
+  def rampExposure(standard: XMP, image: XMP): BigDecimal = rampMirrorPrevious.rampExposure(standard, image)
 
-  def flushRampedXMP(xmp: XMP): Unit = {
-    val exposureTag = s"<crs:Exposure2012>${xmp.settings.exposure}</crs:Exposure2012>"
-    if (xmp.settings.exposureExistsInXMP) {
-      // Update
-//      val updatedXMP = xmp.content.replaceFirst("<crs:Exposure2012>(.*)</crs:Exposure2012>", exposureTag)
-//      writer.write(xmp.xmpFilePath, updatedXMP)
-    } else {
-      // Add
-      val beginningOfCRS = "xmlns:crs.*[^>]>{1}(\\s)<"
-//      val addedXMP = xmp.content.replaceFirst(beginningOfCRS, exposureTag)
-//      writer.write(xmp.xmpFilePath, addedXMP)
-    }
+  def flushXMP(xmp: XMP): Unit = {
+    val xmpStr = s"""
+       |<x:xmpmeta xmlns:x='adobe:ns:meta/' x:xmptk='hu.szigyi.timelapse.ramping'>
+       |<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+       | <rdf:Description rdf:about=''
+       |  xmlns:crs='http://ns.adobe.com/camera-raw-settings/1.0/'>
+       |  <crs:Exposure2012>${xmp.settings.exposure}</crs:Exposure2012>
+       | </rdf:Description>
+       |</rdf:RDF>
+       |</x:xmpmeta>
+     """.stripMargin
+//    XmpWriter.write(new FileOutputStream(xmp.xmpFilePath), xmp.metadata)
+    writer.write(xmp.xmpFilePath, xmpStr)
+    logger.info(s"XMP is created: ${xmp.xmpFilePath}")
   }
 
   private def parseXMP(imageFile: File, metadata: Metadata) = {
@@ -54,8 +58,7 @@ class XmpService(cli: CLI,
 
     val xmpFile = ioUtil.replaceExtension(imageFile, ".xmp")
     val xmpSettings = parseXMPSettings(exifDir)
-    logger.info(xmpSettings.toString)
-    XMP(xmpFile, metadata, xmpSettings)
+    XMP(xmpFile, xmpSettings)
   }
 
   private def parseXMPSettings(exifDir: ExifSubIFDDirectory): XMPSettings = {
