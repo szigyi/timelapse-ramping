@@ -4,6 +4,7 @@ import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.factory.ComponentFactory
+import hu.szigyi.timelapse.ramping.model.XMP
 
 object Main extends App with LazyLogging with ComponentFactory {
   logger.info("Timelapse Ramping application is running...")
@@ -12,11 +13,10 @@ object Main extends App with LazyLogging with ComponentFactory {
   private val dir = "/Users/szabolcs/jumping_sunset/"
 
   logger.info(s"Listing all the images ...")
-  private val files: List[File] = reader.listFilesFromDirectory(dir, imagesConfig.supportedFileExtensions)
+  private val files: Seq[File] = reader.listFilesFromDirectory(dir, imagesConfig.supportedFileExtensions)
   logger.info(s"Found ${files.size} images")
-  private val shiftingWindow = 1
-  private val shiftedFiles = files.drop(shiftingWindow)
 
-  private val filesTuple = files.zip(shiftedFiles)
-  filesTuple.foreach(tuple => stepByStep.run(tuple._1, tuple._2))
+  private val xmps: Seq[XMP] = application.readXMPs(files)
+  private val rampedXMPs: Seq[XMP] = application.interpolateExposure(xmps)
+  application.exportXMPs(rampedXMPs)
 }

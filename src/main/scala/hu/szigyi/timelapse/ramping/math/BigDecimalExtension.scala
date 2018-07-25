@@ -14,7 +14,7 @@ object BigDecimalConverter {
   implicit def convertFromInt(int: Int): JavaBigDecimal = new JavaBigDecimal(int, defaultMathContext)
 }
 
-object BigDecimalEquals {
+object BigDecimalDecorator {
   import math.BigDecimal._
 
   implicit def decorateBigDecimal(bigDecimal: BigDecimal): BigDecimalExt = BigDecimalExt(bigDecimal)
@@ -25,9 +25,17 @@ object BigDecimalEquals {
       val scaledBD2 = bd2.setScale(defaultMathContext.getPrecision, defaultMathContext.getRoundingMode)
       scaledBD1.equals(scaledBD2)
     }
+
+    def `^2`: BigDecimal = {
+      import BigDecimalConverter._
+      import ch.obermuhlner.math.big.BigDecimalMath._
+      pow(bd1, 2l, defaultMathContext)
+    }
+
+    def neg: BigDecimal = bd1 * -1
   }
 
-  private implicit def roundingModeConverter(roundingMode: JavaRoundingMode): RoundingMode = roundingMode match {
+  implicit def roundingModeConverter(roundingMode: JavaRoundingMode): RoundingMode = roundingMode match {
     case JavaRoundingMode.CEILING => RoundingMode.CEILING
     case JavaRoundingMode.DOWN => RoundingMode.DOWN
     case JavaRoundingMode.FLOOR => RoundingMode.FLOOR
