@@ -69,6 +69,7 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
     (BigDecimal(0.0), false)
   }
 
+  // TODO adding ClassTag to keep type information for runtime
   private def nullToError[T](result: T, errorReason: String): T = result match {
     case realResult: T => realResult
     case null => throw new RuntimeException(errorReason)

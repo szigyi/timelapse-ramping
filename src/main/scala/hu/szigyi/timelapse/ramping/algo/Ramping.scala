@@ -33,13 +33,19 @@ class Equations {
     * EVdiff=log2(a1^2^/a2^2^)<br/>
     * @param a1 base aperture
     * @param a2 current aperture
-    * @return
+    * @return EVdiff
     */
   def apertures(a1: BigDecimal, a2: BigDecimal): BigDecimal = {
     val div = a1.`^2` / a2.`^2`
     log2(div, defaultMathContext)
   }
 
+  /**
+    * EVdiff=log2(i1/i2)<br/>
+    * @param i1 base ISO
+    * @param i2 current ISO
+    * @return EVdiff
+    */
   def ISOs(i1: Int, i2: Int): BigDecimal = {
     val div = BigDecimal(i1) / BigDecimal(i2)
     log2(div, defaultMathContext)
