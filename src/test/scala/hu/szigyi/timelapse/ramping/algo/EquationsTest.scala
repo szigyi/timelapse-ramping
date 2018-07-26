@@ -1,14 +1,12 @@
 package hu.szigyi.timelapse.ramping.algo
 
 
-import java.math.{MathContext, RoundingMode}
+import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
 
 import BigDecimal._
 import org.scalatest.{Matchers, Outcome, fixture}
 
 class EquationsTest extends fixture.FunSpec with Matchers {
-
-  val roundingMathContext = new MathContext(1, RoundingMode.HALF_EVEN)
 
   override type FixtureParam = Equations
 
@@ -16,60 +14,61 @@ class EquationsTest extends fixture.FunSpec with Matchers {
 
   describe("Shutter speed") {
     it("result uses default math context") { eq =>
-      val ss1 = BigDecimal("1")
-      val ss2 = BigDecimal("0.5")
+      val base = BigDecimal("1")
+      val current = BigDecimal("0.5")
 
-      val EVdiff = eq.shutterSpeeds(ss1, ss2)
+      val EVdiff = eq.shutterSpeeds(base, current)
 
       EVdiff.mc shouldEqual defaultMathContext
     }
 
-    it("shutter speeds 1 stop away") { eq =>
-      val expected = BigDecimal("1.0", defaultMathContext)
-      val ss1 = BigDecimal("1")
-      val ss2 = BigDecimal("0.5")
+    it("shutter speeds 1 stop away - current should be brighter") { eq =>
+      val base = BigDecimal("1") // base brighter
+      val current = BigDecimal("0.5") // current darker
+      val expected = BigDecimal("1") // brightening current
 
-      val EVdiff = eq.shutterSpeeds(ss1, ss2)
+      val EVdiff = eq.shutterSpeeds(base, current)
 
       EVdiff shouldEqual expected
     }
 
-    it("shutter speeds -3 stops away") { eq =>
-      val expected = BigDecimal("-3.0", defaultMathContext)
-      val ss1 = BigDecimal("0.25")
-      val ss2 = BigDecimal("2")
+    it("shutter speeds -3 stops away - current should be darker") { eq =>
+      val base = BigDecimal("0.25") // base darker
+      val current = BigDecimal("2") // current brighter
+      val expected = BigDecimal("-3") // darkening current
 
-      val EVdiff = eq.shutterSpeeds(ss1, ss2)
+      val EVdiff = eq.shutterSpeeds(base, current)
+
       EVdiff shouldEqual expected
     }
   }
 
   describe("Aperture (rounding result to precision 1)") {
     it("result uses default math context") { eq =>
-      val a1 = BigDecimal("2.8")
-      val a2 = BigDecimal("8")
+      val base = BigDecimal("2.8")
+      val current = BigDecimal("8")
 
-      val EVdiff = eq.shutterSpeeds(a1, a2)
+      val EVdiff = eq.shutterSpeeds(base, current)
 
       EVdiff.mc shouldEqual defaultMathContext
     }
 
-    it("aperture 1 stop away") { eq =>
-      val expected = BigDecimal("-1.0")
-      val a1 = BigDecimal("1")
-      val a2 = BigDecimal("1.4")
+    it("aperture 1 stop away - current should be brighter") { eq =>
+      val base = BigDecimal("1") // base brighter
+      val current = BigDecimal("1.4") // current darker
+      val expected = BigDecimal("1") // brightening
 
-      val EVdiff = eq.apertures(a1, a2)
+      val EVdiff = eq.apertures(base, current)
 
       EVdiff.round(roundingMathContext) shouldEqual expected
     }
 
-    it("aperture 3 stops away") { eq =>
-      val expected = BigDecimal("-3.0")
-      val a1 = BigDecimal("4.0")
-      val a2 = BigDecimal("11.0")
+    it("aperture -3 stops away - current should be darker") { eq =>
+      val base = BigDecimal("11") // base darker
+      val current = BigDecimal("4") // current brighter
+      val expected = BigDecimal("-3") // darkening
 
-      val EVdiff = eq.apertures(a1, a2)
+      val EVdiff = eq.apertures(base, current)
 
       EVdiff.round(roundingMathContext) shouldEqual expected
     }
@@ -77,30 +76,30 @@ class EquationsTest extends fixture.FunSpec with Matchers {
 
   describe("ISO") {
     it("result uses default math context") { eq =>
-      val i1 = 100
-      val i2 = 200
+      val base = 100
+      val current = 200
 
-      val EVdiff = eq.ISOs(i1, i2)
+      val EVdiff = eq.ISOs(base, current)
 
       EVdiff.mc shouldEqual defaultMathContext
     }
 
-    it("ISO 1 stop away") { eq =>
-      val expected = BigDecimal("-1.0")
-      val i1 = 100
-      val i2 = 200
+    it("ISO 1 stop away - current should be brighter") { eq =>
+      val base = 200 // base brighter
+      val current = 100 // current darker
+      val expected = BigDecimal("1") // brightening
 
-      val EVdiff = eq.ISOs(i1, i2)
+      val EVdiff = eq.ISOs(base, current)
 
       EVdiff.round(roundingMathContext) shouldEqual expected
     }
 
-    it("ISO 3 stops away") { eq =>
-      val expected = BigDecimal("-3.0")
-      val i1 = 100
-      val i2 = 800
+    it("ISO -3 stops away - current should be darker") { eq =>
+      val base = 100 // base darker
+      val current = 800 // current brighter
+      val expected = BigDecimal("-3") // darkening
 
-      val EVdiff = eq.ISOs(i1, i2)
+      val EVdiff = eq.ISOs(base, current)
 
       EVdiff.round(roundingMathContext) shouldEqual expected
     }

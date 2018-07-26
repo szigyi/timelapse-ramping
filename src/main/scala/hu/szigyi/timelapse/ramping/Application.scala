@@ -11,24 +11,24 @@ class Application(xmpService: XmpService) extends LazyLogging {
   def readXMPs(imageFiles: Seq[File]): Seq[XMP] = imageFiles.map(imageFile => xmpService.getXMP(imageFile))
 
   def interpolateExposure(xmps: Seq[XMP]): Seq[XMP] = {
-    var standard: XMP = xmps.head
+    var base: XMP = xmps.head
     xmps.drop(1).map(xmp => {
-      val rampedExposure = ramping(standard, xmp)
+      val rampedExposure = ramping(base, xmp)
 
-      standard = updateExposure(xmp, rampedExposure)
+      base = updateExposure(xmp, rampedExposure)
 
-      standard
+      base
     })
   }
 
   def exportXMPs(xmps: Seq[XMP]): Unit = xmps.foreach(xmp => xmpService.flushXMP(xmp))
 
-  private def ramping(standardXmp: XMP, xmp: XMP): BigDecimal = {
-    logger.info(s"Using '${standardXmp.xmpFilePath.getName}' to ramp '${xmp.xmpFilePath.getName}'")
+  private def ramping(baseXmp: XMP, xmp: XMP): BigDecimal = {
+    logger.info(s"Using '${baseXmp.xmpFilePath.getName}' to ramp '${xmp.xmpFilePath.getName}'")
 
     // TODO Applying the Ramping on the second 'file' from the one
-    val rampedExposure = xmpService.rampExposure(standardXmp, xmp)
-    logger.info(s"Standard: $standardXmp")
+    val rampedExposure = xmpService.rampExposure(baseXmp, xmp)
+    logger.info(s"Base: $baseXmp")
     logger.info(s"Original: $xmp")
     logger.info(s"Ramped  : $rampedExposure")
     // TODO Save the Ramped xmp file

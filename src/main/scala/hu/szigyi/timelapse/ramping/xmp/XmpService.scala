@@ -25,7 +25,7 @@ class XmpService(cli: CLI,
     parseXMP(imageFile, metadata)
   }
 
-  def rampExposure(standard: XMP, image: XMP): BigDecimal = rampMirrorPrevious.rampExposure(standard, image)
+  def rampExposure(base: XMP, current: XMP): BigDecimal = rampMirrorPrevious.rampExposure(base, current)
 
   def flushXMP(xmp: XMP): Unit = {
     val xmpStr = s"""
