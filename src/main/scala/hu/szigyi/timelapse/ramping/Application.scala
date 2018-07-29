@@ -14,9 +14,12 @@ class Application(xmpService: XmpService) extends LazyLogging {
     var base: XMP = xmps.head
     xmps.drop(1).map(xmp => {
       val rampedExposure = ramping(base, xmp)
-
+      // Updating the base with the current XMP because the current updated will be the base for the next iteration
+      // TODO it is not a functional way of doing it, it smells
+      logger.info(s"Base    : $base")
       base = updateExposure(xmp, rampedExposure)
-
+      logger.info(s"Original: $xmp")
+      logger.info(s"Ramped  : $base\n\n")
       base
     })
   }
@@ -25,17 +28,7 @@ class Application(xmpService: XmpService) extends LazyLogging {
 
   private def ramping(baseXmp: XMP, xmp: XMP): BigDecimal = {
     logger.info(s"Using '${baseXmp.xmpFilePath.getName}' to ramp '${xmp.xmpFilePath.getName}'")
-
-    // TODO Applying the Ramping on the second 'file' from the one
-    val rampedExposure = xmpService.rampExposure(baseXmp, xmp)
-    logger.info(s"Base: $baseXmp")
-    logger.info(s"Original: $xmp")
-    logger.info(s"Ramped  : $rampedExposure")
-    // TODO Save the Ramped xmp file
-    //    if (!xmp.equals(rampedXMP)) {
-    //      xmpService.flushRampedXMP(rampedXMP)
-    //    }
-    rampedExposure
+    xmpService.rampExposure(baseXmp, xmp)
   }
 
   private def updateExposure(xmp: XMP, exposure: BigDecimal): XMP = {
