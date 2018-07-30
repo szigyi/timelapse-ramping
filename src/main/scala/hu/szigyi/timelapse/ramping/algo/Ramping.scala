@@ -29,8 +29,6 @@ class MirrorPrevious(EVdiffAlgo: EVDifference) extends RampingByPairs(EVdiffAlgo
     val baseExposure = base.settings.exposure
     val rampedExposure = expoAdd(expoAdd(expoAdd(baseExposure, shutterBias), apertureBias), isoBias)
     rampedExposure
-//    val rampedSettings = image.settings.copy(exposure = rampedExposure)
-//    image.copy(settings = rampedSettings)
   }
 }
 object MirrorPrevious {
@@ -60,4 +58,8 @@ class AverageWindow(EVdiffAlgo: EVDifference, avgCount: Int) extends RampingBySe
 
     EVdiffAlgo.fromShutterSpeeds
   }
+}
+
+class Interpolation(EVdiffAlgo: EVDifference) extends RampingBySeq(EVdiffAlgo) {
+  override def rampExposure(xmps: XMP*): BigDecimal = ???
 }

@@ -20,6 +20,7 @@ ext {
     logbackVersion = "1.2.3"
     xPathVersion = "0.4.0"
     bigMathVersion = "2.0.1"
+    ringVersion = "2.5.1"
 
     junitVersion = "4.12"
     scalatestVersion = "3.0.5"
@@ -33,7 +34,7 @@ dependencies {
 
     compile group: 'com.nrinaudo', name: "kantan.xpath_$scalaMajorVersion", version: "$xPathVersion"
     compile group: 'ch.obermuhlner', name: 'big-math', version: "$bigMathVersion"
-
+    compile group: 'cc.redberry', name: 'rings', version: "$ringVersion"
 
     compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.11.0'
 
