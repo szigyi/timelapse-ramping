@@ -8,7 +8,7 @@ import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
 import com.drew.metadata.xmp.XmpWriter
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.algo.MirrorPrevious
+import hu.szigyi.timelapse.ramping.algo.{MirrorPrevious, Ramping}
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
 import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
@@ -17,7 +17,7 @@ class XmpService(cli: CLI,
                  ioUtil: IOUtil,
                  reader: Reader,
                  xmpParser: XmpParser,
-                 rampMirrorPrevious: MirrorPrevious,
+                 ramping: Ramping,
                  writer: Writer) extends LazyLogging {
 
   def getXMP(imageFile: File): XMP = {
@@ -25,7 +25,7 @@ class XmpService(cli: CLI,
     parseXMP(imageFile, metadata)
   }
 
-  def rampExposure(base: XMP, current: XMP): BigDecimal = rampMirrorPrevious.rampExposure(base, current)
+  def rampExposure(base: XMP, current: XMP): BigDecimal = ramping.rampExposure(base, current)
 
   def flushXMP(xmp: XMP): Unit = {
     val xmpStr = s"""
@@ -77,6 +77,6 @@ object XmpService {
             ioUtil: IOUtil,
             reader: Reader,
             xmpParser: XmpParser,
-            rampMirrorPrevious: MirrorPrevious,
-            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, rampMirrorPrevious, writer)
+            ramping: Ramping,
+            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, ramping, writer)
 }

@@ -6,11 +6,11 @@ import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
 import BigDecimal._
 import org.scalatest.{Matchers, Outcome, fixture}
 
-class EquationsTest extends fixture.FunSpec with Matchers {
+class EVTest extends fixture.FunSpec with Matchers {
 
-  override type FixtureParam = Equations
+  override type FixtureParam = EV
 
-  override protected def withFixture(test: OneArgTest): Outcome = test(Equations())
+  override protected def withFixture(test: OneArgTest): Outcome = test(EV())
 
   describe("Shutter speed") {
     it("result uses default math context") { eq =>

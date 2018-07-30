@@ -6,11 +6,11 @@ import org.scalatest.fixture.FunSpec
 import BigDecimal._
 import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
 
-class EVdifferenceTest extends FunSpec with Matchers {
+class EVDifferenceTest extends FunSpec with Matchers {
 
-  override type FixtureParam = EVdifference
+  override type FixtureParam = EVDifference
 
-  override protected def withFixture(test: OneArgTest): Outcome = test(EVdifference(Equations()))
+  override protected def withFixture(test: OneArgTest): Outcome = test(EVDifference(EV()))
 
   private def xmpSS(ss: BigDecimal): XMPSettings = XMPSettings(100, ss, BigDecimal("1.0"), BigDecimal("0.0"), false)
   private def xmpA(a: BigDecimal): XMPSettings = XMPSettings(100, BigDecimal("0.25"), a, BigDecimal("0.0"), false)
