@@ -54,10 +54,7 @@ object MirrorAndSqueeze {
 
 class AverageWindow(EVdiffAlgo: EVDifference, avgCount: Int) extends RampingBySeq(EVdiffAlgo) {
 
-  override def rampExposure(xmps: XMP*): BigDecimal = {
-
-    EVdiffAlgo.fromShutterSpeeds
-  }
+  override def rampExposure(xmps: XMP*): BigDecimal = ???
 }
 
 class Interpolation(EVdiffAlgo: EVDifference) extends RampingBySeq(EVdiffAlgo) {
