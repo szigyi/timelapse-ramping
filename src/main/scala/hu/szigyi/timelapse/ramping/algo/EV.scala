@@ -30,7 +30,7 @@ class EV {
     * @param iso
     * @return
     */
-  def ev(aperture: BigDecimal, shutterSpeed: BigDecimal, iso: Int): BigDecimal = {
+  def EV(aperture: BigDecimal, shutterSpeed: BigDecimal, iso: Int): BigDecimal = {
     val div = aperture.`^2` / shutterSpeed
     val EVCompensation = log2(div, defaultMathContext)
 
