@@ -1,8 +1,10 @@
 package hu.szigyi.timelapse.ramping.algo
 
+import hu.szigyi.timelapse.ramping.algo.ev.EVDifference
 import hu.szigyi.timelapse.ramping.model.XMPSettings
 import org.scalatest.{Matchers, Outcome}
 import org.scalatest.fixture.FunSpec
+
 import BigDecimal._
 import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
 

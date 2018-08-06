@@ -35,6 +35,10 @@ dependencies {
     compile group: 'com.nrinaudo', name: "kantan.xpath_$scalaMajorVersion", version: "$xPathVersion"
     compile group: 'ch.obermuhlner', name: 'big-math', version: "$bigMathVersion"
     compile group: 'cc.redberry', name: 'rings', version: "$ringVersion"
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+    compile group: 'org.scalanlp', name: 'breeze_2.12', version: '0.13.2'
+
+
 
     compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.11.0'
 

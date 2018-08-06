@@ -1,6 +1,7 @@
 package hu.szigyi.timelapse.ramping.algo
 
 
+import hu.szigyi.timelapse.ramping.algo.ev.EV
 import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
 
 import BigDecimal._
