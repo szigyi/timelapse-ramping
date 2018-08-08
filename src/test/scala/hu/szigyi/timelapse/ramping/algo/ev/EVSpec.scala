@@ -1,13 +1,11 @@
-package hu.szigyi.timelapse.ramping.algo
+package hu.szigyi.timelapse.ramping.algo.ev
 
-
-import hu.szigyi.timelapse.ramping.algo.ev.EV
 import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
-
-import BigDecimal._
 import org.scalatest.{Matchers, Outcome, fixture}
 
-class EVTest extends fixture.FunSpec with Matchers {
+import scala.BigDecimal._
+
+class EVSpec extends fixture.FunSpec with Matchers {
 
   override type FixtureParam = EV
 

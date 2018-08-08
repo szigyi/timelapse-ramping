@@ -9,14 +9,13 @@ import breeze.interpolation._
 
 class Interpolator(ev: EV, rampHelper: RampHelper) extends LazyLogging {
 
-
   def buildInterpolator(xmps: Seq[XMP]): LinearInterpolator[Double] = {
     val EVs: Seq[BigDecimal] = xmps.map(xmp => rampHelper.toEV(xmp))
-    val resids: Seq[Double] = rampHelper.residuals(EVs).map(_.toDouble)
-    val indices: Seq[Double] = (0 to xmps.size - 1).map(_.toDouble)
+    val changesInEVs: Seq[BigDecimal] = rampHelper.relativeChangesInEVs(EVs)
+    val squashedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.removeNotBoundaryZeros(changesInEVs)
 
-    val x: DenseVector[Double] = DenseVector(indices: _*)
-    val y: DenseVector[Double] = DenseVector(resids: _*)
+    val x: DenseVector[Double] = DenseVector(squashedChangesInEVs.map(_._1.toDouble): _*)
+    val y: DenseVector[Double] = DenseVector(squashedChangesInEVs.map(_._2.toDouble): _*)
     LinearInterpolator(x, y)
   }
 

@@ -1,9 +1,8 @@
-package hu.szigyi.timelapse.ramping.algo
+package hu.szigyi.timelapse.ramping.algo.ramp
 
-import org.scalatest.Matchers
-import org.scalatest.FunSpec
+import org.scalatest.{FunSpec, Matchers}
 
-class RampTest extends FunSpec with Matchers {
+class RampSpec extends FunSpec with Matchers {
 
   describe("Ramping should consider the laready modified pics's EV as well.") {
     it("should return the EV if it is already in the file and 'larger' then the calculated value!") {

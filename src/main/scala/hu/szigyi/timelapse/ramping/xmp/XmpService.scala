@@ -26,7 +26,7 @@ class XmpService(cli: CLI,
 
   def rampExposure(xmps: Seq[XMP]): Seq[BigDecimal] = {
     implicit val f = ramp.buildInterpolator(xmps)
-      val indicesOfXMPs = (0 to xmps.size - 1)
+    val indicesOfXMPs = (0 to xmps.size - 1) // TODO extract and then use rampHelper.indicies(xmps) method
     indicesOfXMPs.map(index => ramp.rampExposure(index)(f))
   }
 
