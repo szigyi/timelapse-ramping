@@ -13,9 +13,10 @@ class Interpolator(ev: EV, rampHelper: RampHelper) extends LazyLogging {
     val EVs: Seq[BigDecimal] = xmps.map(xmp => rampHelper.toEV(xmp))
     val changesInEVs: Seq[BigDecimal] = rampHelper.relativeChangesInEVs(EVs)
     val squashedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.removeNotBoundaryZeros(changesInEVs)
+    val enhancedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.addZeroRightBetweenChanges(squashedChangesInEVs)
 
-    val x: DenseVector[Double] = DenseVector(squashedChangesInEVs.map(_._1.toDouble): _*)
-    val y: DenseVector[Double] = DenseVector(squashedChangesInEVs.map(_._2.toDouble): _*)
+    val x: DenseVector[Double] = DenseVector(enhancedChangesInEVs.map(_._1.toDouble): _*)
+    val y: DenseVector[Double] = DenseVector(enhancedChangesInEVs.map(_._2.toDouble): _*)
     LinearInterpolator(x, y)
   }
 

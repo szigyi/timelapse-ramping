@@ -57,18 +57,41 @@ class RampHelper(ev: EV) {
     * @return squashed changes in EV with original indices (removed not boundary zeros)
     */
   def removeNotBoundaryZeros(changesInEV: Seq[BigDecimal]): Seq[(Int, BigDecimal)] = {
-    val firstElement = (0, changesInEV.head)
-    val lastElement = (changesInEV.size - 1, changesInEV.last)
-    var notZeros = indiciesOf(changesInEV).zip(changesInEV).filterNot(p => p._2 === ZERO)
-    firstElement +: notZeros :+ lastElement
-//
-    if (notZeros.isEmpty || !notZeros.head.equals(firstElement)) {
-      notZeros = firstElement +: notZeros
+
+    def addFirstAndLastElements(original: Seq[(Int, BigDecimal)]): Seq[(Int, BigDecimal)] = {
+      var seq = original
+      val firstElement = (0, changesInEV.head)
+      val lastElement = (changesInEV.size - 1, changesInEV.last)
+
+      if (seq.isEmpty || !seq.head.equals(firstElement)) {
+        seq = firstElement +: seq
+      }
+      if (seq.size.equals(1) || !seq.last.equals(lastElement)) {
+        seq = seq :+ lastElement
+      }
+      seq
     }
-    if (notZeros.size.equals(1) || !notZeros.last.equals(lastElement)) {
-      notZeros = notZeros :+ lastElement
-    }
-    notZeros
+
+    val notZeros = indiciesOf(changesInEV).zip(changesInEV).filterNot(_._2 === ZERO)
+    addFirstAndLastElements(notZeros)
+  }
+
+  def addZeroRightBetweenChanges(notBoundaryZeros: Seq[(Int, BigDecimal)]): Seq[(Int, BigDecimal)] = {
+    def avg(i1: Int, i2: Int): Int = math.round((i1 + i2) / 2)
+    def areNeighbours(i1: (Int, BigDecimal), i2: (Int, BigDecimal)): Boolean = i2._1 - i1._1 == 1
+
+    notBoundaryZeros.sliding(slidingWindow).map((e: Seq[(Int, BigDecimal)]) => {
+      val first = e.head
+      val last = e(1)
+      if (areNeighbours(first, last)) {
+        Seq((first._1, first._2))
+      } else {
+        Seq(
+          (first._1, first._2),
+          (avg(first._1, last._1), ZERO)
+        )
+      }
+    }).toSeq.flatten
   }
 
   def toEV(xmp: XMP): BigDecimal = ev.EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)

@@ -10,6 +10,8 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
 
   override protected def withFixture(test: OneArgTest): Outcome = test(RampHelper(EV()))
 
+  def t(i: Int, v: String): (Int, BigDecimal) = (i, BigDecimal(v))
+
   describe("Calculate Changes in EVs") {
 
     it("should return same size of seq") { helper =>
@@ -109,6 +111,26 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val squashed = helper.removeNotBoundaryZeros(EVs)
 
       squashed shouldEqual expected
+    }
+  }
+
+  describe("Add Zeros right between the changes") {
+    it("basic example") { helper =>
+      val changes = Seq(t(0, "0.0"), t(4, "4.6547"))
+      val expected = Seq(t(0, "0.0"), t(2, "0.0"), t(4, "4.6547"))
+
+      val result = helper.addZeroRightBetweenChanges(changes)
+
+      result shouldEqual expected
+    }
+
+    it("should return the original sequence if the changes are neighbours") { helper =>
+      val changes = Seq(t(0, "0.0"), t(1, "4.6547"))
+      val expected = Seq(t(0, "0.0"), t(1, "4.6547"))
+
+      val result = helper.addZeroRightBetweenChanges(changes)
+
+      result shouldEqual expected
     }
   }
 }
