@@ -5,25 +5,14 @@ import hu.szigyi.timelapse.ramping.conf.{ApplicationConfiguration, ReferenceConf
 
 trait ConfigurationFactory extends LazyLogging {
 
-  val refConfig = pureconfig.loadConfig[ReferenceConfiguration] match {
-    case Right(c) => c
-    case Left(error) => {
-      error.toList.foreach(e => logger.error(e.toString))
-      throw new RuntimeException("Unable to parse reference.conf file into their classes!")
-    }
-  }
+  val refConfig = pureconfig.loadConfigOrThrow[ReferenceConfiguration]
   val metadataConfig = refConfig.metadata
   val versionConfig = metadataConfig.version
 
 
-  val appConfig = pureconfig.loadConfig[ApplicationConfiguration] match {
-    case Right(c) => c
-    case Left(error) => {
-      error.toList.foreach(e => logger.error(e.toString))
-      throw new RuntimeException("Unable to parse application.conf file into their classes!")
-    }
-  }
+  val appConfig = pureconfig.loadConfigOrThrow[ApplicationConfiguration]
   val timelapseRampingConfig = appConfig.timelapseRamping
   val imagesConfig = timelapseRampingConfig.imagesConfig
   val defaultConfig = timelapseRampingConfig.default
+  val modesConfig = timelapseRampingConfig.modes
 }
