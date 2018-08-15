@@ -7,7 +7,7 @@ import com.drew.imaging.ImageMetadataReader._
 import com.drew.metadata.Metadata
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.algo.ramp.Interpolator
+import hu.szigyi.timelapse.ramping.algo.ramp.{Interpolator, RampHelper}
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
 import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
@@ -16,6 +16,7 @@ class XmpService(cli: CLI,
                  ioUtil: IOUtil,
                  reader: Reader,
                  xmpParser: XmpParser,
+                 rampHelper: RampHelper,
                  ramp: Interpolator,
                  writer: Writer) extends LazyLogging {
 
@@ -25,8 +26,9 @@ class XmpService(cli: CLI,
   }
 
   def rampExposure(xmps: Seq[XMP]): Seq[BigDecimal] = {
-    implicit val f = ramp.buildInterpolator(xmps)
-    val indicesOfXMPs = (0 to xmps.size - 1) // TODO extract and then use rampHelper.indicies(xmps) method
+    val EVs: Seq[BigDecimal] = xmps.map(xmp => rampHelper.toEV(xmp))
+    implicit val f = ramp.buildInterpolator(EVs)
+    val indicesOfXMPs = (0 to xmps.size - 1)
     indicesOfXMPs.map(index => ramp.rampExposure(index)(f))
   }
 
@@ -80,6 +82,7 @@ object XmpService {
             ioUtil: IOUtil,
             reader: Reader,
             xmpParser: XmpParser,
+            rampHelper: RampHelper,
             ramp: Interpolator,
-            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, ramp, writer)
+            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, rampHelper, ramp, writer)
 }

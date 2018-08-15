@@ -47,17 +47,17 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val EVs = Seq(value, value, value, value, value)
       val expected = Seq((0, value), (1, value),(2, value), (3, value), (4, value))
 
-      val squashed = helper.removeNotBoundaryZeros(EVs)
+      val squashed = helper.removeNonBoundaryZeros(EVs)
 
       squashed shouldEqual expected
     }
 
-    it("should return the first and last zeros if every value is zero and the same") { helper =>
+    it("should return the first and last zeros if every value is zero") { helper =>
       val value = BigDecimal("0.0")
       val EVs = Seq(value, value, value, value, value)
       val expected = Seq((0, value), (4, value))
 
-      val squashed = helper.removeNotBoundaryZeros(EVs)
+      val squashed = helper.removeNonBoundaryZeros(EVs)
 
       squashed shouldEqual expected
     }
@@ -66,7 +66,7 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val EVs = Seq(BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("0.1"))
       val expected = Seq((0, BigDecimal("0.0")), (3, BigDecimal("0.1")))
 
-      val squashed = helper.removeNotBoundaryZeros(EVs)
+      val squashed = helper.removeNonBoundaryZeros(EVs)
 
       squashed shouldEqual expected
     }
@@ -75,7 +75,7 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val EVs = Seq(BigDecimal("0.1"), BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("0.1"))
       val expected = Seq((0, BigDecimal("0.1")), (4, BigDecimal("0.1")))
 
-      val squashed = helper.removeNotBoundaryZeros(EVs)
+      val squashed = helper.removeNonBoundaryZeros(EVs)
 
       squashed shouldEqual expected
     }
@@ -84,7 +84,7 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val EVs = Seq(BigDecimal("0.1"), BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("0.0"))
       val expected = Seq((0, BigDecimal("0.1")), (3, BigDecimal("0.0")))
 
-      val squashed = helper.removeNotBoundaryZeros(EVs)
+      val squashed = helper.removeNonBoundaryZeros(EVs)
 
       squashed shouldEqual expected
     }
@@ -105,30 +105,50 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
         (259, BigDecimal("-1")),
         (279, BigDecimal("-1")),
         (302, BigDecimal("-1.321928095")),
-        (322, BigDecimal("0.0")),
+        (322, BigDecimal("0.0"))
       )
 
-      val squashed = helper.removeNotBoundaryZeros(EVs)
+      val squashed = helper.removeNonBoundaryZeros(EVs)
 
       squashed shouldEqual expected
     }
   }
 
-  describe("Add Zeros right between the changes") {
-    it("basic example") { helper =>
+  describe("Convert sequence to a Cut-Off sequence") {
+    it("should not add zero if the sequence contains only two elements aka. sequence is a boundary only seq") { helper =>
       val changes = Seq(t(0, "0.0"), t(4, "4.6547"))
-      val expected = Seq(t(0, "0.0"), t(2, "0.0"), t(4, "4.6547"))
+      val expected = Seq(t(0, "0.0"), t(4, "4.6547"))
 
-      val result = helper.addZeroRightBetweenChanges(changes)
+      val result = helper.toCutOffSequence(changes)
 
       result shouldEqual expected
     }
 
     it("should return the original sequence if the changes are neighbours") { helper =>
-      val changes = Seq(t(0, "0.0"), t(1, "4.6547"))
-      val expected = Seq(t(0, "0.0"), t(1, "4.6547"))
+      val changes = Seq(t(0, "0.0"), t(1, "4.6547"), t(2, "2.547"), t(3, "7.64"))
+      val expected = Seq(t(0, "0.0"), t(1, "4.6547"), t(2, "2.547"), t(3, "7.64"))
 
-      val result = helper.addZeroRightBetweenChanges(changes)
+      val result = helper.toCutOffSequence(changes)
+
+      result shouldEqual expected
+    }
+
+    it("should return the cut-off sequence if there is a gap in indices") { helper =>
+      val changes = Seq(t(0, "0.0"), t(2, "4.6547"), t(4, "2.547"), t(6, "7.64"))
+      val expected = Seq(t(0, "0.0"), t(2, "4.6547"), t(3, "0.0"), t(4, "2.547"), t(5, "0.0"), t(6, "7.64"))
+
+      val result = helper.toCutOffSequence(changes)
+
+      result shouldEqual expected
+    }
+  }
+
+  describe("Shifting the Sequence's indices") {
+    it("should return the shifted sequence") { helper =>
+      val sequence = Seq(t(0, "0"), t(3, "3"), t(5, "5"), t(8, "8"))
+      val expected = Seq(t(0, "0"), t(2, "3"), t(4, "5"), t(7, "8"), t(8, "0"))
+
+      val result = helper.shiftSequenceIndices(sequence)
 
       result shouldEqual expected
     }

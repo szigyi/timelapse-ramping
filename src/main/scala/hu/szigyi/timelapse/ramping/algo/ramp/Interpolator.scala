@@ -2,21 +2,19 @@ package hu.szigyi.timelapse.ramping.algo.ramp
 
 import breeze.linalg.DenseVector
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.algo.ev.EV
-import hu.szigyi.timelapse.ramping.model.XMP
 
 import breeze.interpolation._
 
-class Interpolator(ev: EV, rampHelper: RampHelper) extends LazyLogging {
+class Interpolator(rampHelper: RampHelper) extends LazyLogging {
 
-  def buildInterpolator(xmps: Seq[XMP]): LinearInterpolator[Double] = {
-    val EVs: Seq[BigDecimal] = xmps.map(xmp => rampHelper.toEV(xmp))
+  def buildInterpolator(EVs: Seq[BigDecimal]): LinearInterpolator[Double] = {
     val changesInEVs: Seq[BigDecimal] = rampHelper.relativeChangesInEVs(EVs)
-    val squashedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.removeNotBoundaryZeros(changesInEVs)
-    val enhancedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.addZeroRightBetweenChanges(squashedChangesInEVs)
+    val squashedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.removeNonBoundaryZeros(changesInEVs)
+    val enhancedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.toCutOffSequence(squashedChangesInEVs)
+    val shiftedChangesInEVs: Seq[(Int, BigDecimal)] = rampHelper.shiftSequenceIndices(enhancedChangesInEVs)
 
-    val x: DenseVector[Double] = DenseVector(enhancedChangesInEVs.map(_._1.toDouble): _*)
-    val y: DenseVector[Double] = DenseVector(enhancedChangesInEVs.map(_._2.toDouble): _*)
+    val x: DenseVector[Double] = DenseVector(shiftedChangesInEVs.map(_._1.toDouble): _*)
+    val y: DenseVector[Double] = DenseVector(shiftedChangesInEVs.map(_._2.toDouble): _*)
     LinearInterpolator(x, y)
   }
 
@@ -27,5 +25,5 @@ class Interpolator(ev: EV, rampHelper: RampHelper) extends LazyLogging {
 }
 
 object Interpolator {
-  def apply(ev: EV, rampHelper: RampHelper): Interpolator = new Interpolator(ev, rampHelper)
+  def apply(rampHelper: RampHelper): Interpolator = new Interpolator(rampHelper)
 }

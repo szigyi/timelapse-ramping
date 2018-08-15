@@ -10,7 +10,7 @@ object Main extends App with LazyLogging with ComponentFactory {
   logger.info("Timelapse Ramping application is running...")
 
   // TODO parsing program arguments - folder of the pictures
-  private val dir = "/Users/szabolcs/awesome_sunset/"
+  private val dir = "/Users/szabolcs/jumping_sunset/"
 
   logger.info(s"Listing all the images ...")
   private val imageFiles: Seq[File] = reader.listFilesFromDirectory(dir, imagesConfig.supportedFileExtensions)
