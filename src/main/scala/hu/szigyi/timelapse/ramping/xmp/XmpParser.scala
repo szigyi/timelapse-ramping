@@ -42,7 +42,6 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
       case Some(aperture) => aperture
       case None => {
         val apertureStr = exifDir.getString(ExifDirectoryBase.TAG_FNUMBER)
-        logger.info(s"F-Number: $apertureStr")
         val aperture = nullToError(apertureStr, errorMsg)
         rationalToDecimal(aperture)
       }

@@ -61,7 +61,7 @@ class XmpService(cli: CLI,
            """.stripMargin)
     }
 
-    val xmpFile = ioUtil.replaceExtension(imageFile, ".xmp")
+    val xmpFile = ioUtil.replaceExtension(imageFile, "xmp")
     val xmpSettings = parseXMPSettings(exifDir)
     XMP(xmpFile, xmpSettings)
   }

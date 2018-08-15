@@ -6,13 +6,13 @@ import com.typesafe.scalalogging.LazyLogging
 
 class IOUtil extends LazyLogging {
 
+  private val DOT: String = "."
+
   def replaceExtension(file: File, ext: String): File = {
-    val newPath = file.getAbsolutePath.split("\\.").dropRight(1).mkString("") + ext
+    val newPath = file.getAbsolutePath.split("\\" + DOT).dropRight(1).mkString(DOT) + DOT + ext
     logger.debug(s"Changed Extension to $newPath")
     new File(newPath)
   }
-
-  def workingDirectoryOf(file: File): File = new File(file.getParent)
 
   def filterByExtensions(supportedExtensions: List[String]): FilenameFilter = {
     (_: File, name: String) => {
