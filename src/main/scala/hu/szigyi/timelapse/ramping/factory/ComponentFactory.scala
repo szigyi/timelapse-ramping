@@ -24,7 +24,7 @@ trait ComponentFactory extends LazyLogging with ConfigurationFactory {
   val rampAlgo = Interpolator(rampHelper)
 
   val xmpParser = XmpParser(defaultConfig)
-  val xmpService = XmpService(cli, ioUtil, reader, xmpParser, rampHelper, rampAlgo, writer)
+  val xmpService = XmpService(defaultConfig, cli, ioUtil, reader, xmpParser, rampHelper, rampAlgo, writer)
 
   val application = Application(xmpService)
 }

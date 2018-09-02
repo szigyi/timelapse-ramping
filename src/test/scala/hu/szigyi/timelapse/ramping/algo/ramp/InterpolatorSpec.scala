@@ -39,7 +39,7 @@ class InterpolatorSpec extends fixture.FunSpec with Matchers {
 
       val f = int.buildInterpolator(EVs)
       val indicesOfXMPs = (0 to EVs.size - 1)
-      val result = indicesOfXMPs.map(index => int.rampExposure(index)(f))
+      val result = indicesOfXMPs.map(index => int.interpolate(index)(f))
 
       result shouldEqual expected
     }

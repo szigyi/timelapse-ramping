@@ -3,8 +3,9 @@ package hu.szigyi.timelapse.ramping.algo.ramp
 import hu.szigyi.timelapse.ramping.algo.ev.EV
 import hu.szigyi.timelapse.ramping.model.XMP
 
-import scala.math.BigDecimal
+import scala.math.{BigDecimal}
 import hu.szigyi.timelapse.ramping.math.BigDecimalDecorator._
+
 
 class RampHelper(ev: EV) {
 
@@ -18,7 +19,7 @@ class RampHelper(ev: EV) {
   }
 
   /**
-    * Input EVs
+    * Input Data
     * |     ___/-----
     * |    /
     * ____/
@@ -30,12 +31,15 @@ class RampHelper(ev: EV) {
     * ____/ \___/\____
     * 0.   1.   2.
     *
-    * @param EVs
+    * @param data
     * @return sequence of zeros and changes
     */
-  def relativeChangesInEVs(EVs: Seq[BigDecimal]): Seq[BigDecimal] = {
-    val extendedEVs = EVs.head +: EVs
-    extendedEVs.sliding(slidingWindow).map((window: Seq[BigDecimal]) => window.head - window(1)).toSeq
+  def relativeChangesInData(data: Seq[BigDecimal]): Seq[BigDecimal] = {
+    val extendedData = data.head +: data
+    extendedData
+      .sliding(slidingWindow)
+      .map((window: Seq[BigDecimal]) => window.head - window(1))
+      .toSeq
   }
 
   /**
@@ -124,7 +128,7 @@ class RampHelper(ev: EV) {
   }
 
   // TODO extract to an XMP related part, it does not belong to here
-  def toEV(xmp: XMP): BigDecimal = ev.EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)
+  def calculateEV(xmp: XMP): BigDecimal = ev.EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)
 
 //  implicit class RichXMP(val xmp: XMP) extends AnyVal{
 //    def toEV: BigDecimal = EV().EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)

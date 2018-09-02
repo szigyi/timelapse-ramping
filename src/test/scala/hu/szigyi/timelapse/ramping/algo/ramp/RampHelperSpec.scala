@@ -18,7 +18,7 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val evs = Seq(BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("2.0"))
       val size = evs.size
 
-      val result = helper.relativeChangesInEVs(evs)
+      val result = helper.relativeChangesInData(evs)
 
       result.size shouldEqual size
     }
@@ -26,7 +26,7 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val evs = Seq(BigDecimal("5.3464578"), BigDecimal("1.0"), BigDecimal("2.0"))
       val expected = Seq(BigDecimal("0.00000000"), BigDecimal("4.3464578"), BigDecimal("-1.0"))
 
-      val result = helper.relativeChangesInEVs(evs)
+      val result = helper.relativeChangesInData(evs)
 
       result shouldEqual expected
     }
@@ -34,7 +34,7 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
       val evs = Seq(BigDecimal("0.0"), BigDecimal("0.0"), BigDecimal("1.5"))
       val expected = Seq(BigDecimal("0.00000000"), BigDecimal("0.00000000"), BigDecimal("-1.5"))
 
-      val result = helper.relativeChangesInEVs(evs)
+      val result = helper.relativeChangesInData(evs)
 
       result shouldEqual expected
     }
