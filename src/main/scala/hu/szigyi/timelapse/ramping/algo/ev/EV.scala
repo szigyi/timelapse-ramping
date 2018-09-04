@@ -1,11 +1,12 @@
-package hu.szigyi.timelapse.ramping.algo
+package hu.szigyi.timelapse.ramping.algo.ev
 
-import scala.math._
-import math.BigDecimal._
 import ch.obermuhlner.math.big.BigDecimalMath._
 import hu.szigyi.timelapse.ramping.math.BigDecimalConverter._
 import hu.szigyi.timelapse.ramping.math.BigDecimalDecorator._
 import hu.szigyi.timelapse.ramping.model.XMP
+
+import scala.math.BigDecimal._
+import scala.math._
 
 /**
   * Equations are based on the wikipedia page of Exposure Value https://en.wikipedia.org/wiki/Exposure_value<br/>

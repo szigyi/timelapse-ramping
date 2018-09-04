@@ -1,4 +1,4 @@
-package hu.szigyi.timelapse.ramping.algo
+package hu.szigyi.timelapse.ramping.algo.ev
 
 import hu.szigyi.timelapse.ramping.model.XMPSettings
 

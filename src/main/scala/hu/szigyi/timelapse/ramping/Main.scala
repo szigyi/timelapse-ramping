@@ -17,6 +17,6 @@ object Main extends App with LazyLogging with ComponentFactory {
   logger.info(s"Found ${imageFiles.size} images")
 
   private val xmps: Seq[XMP] = application.readXMPs(imageFiles)
-  private val rampedXMPs: Seq[XMP] = application.interpolateExposure(xmps)
+  private val rampedXMPs: Seq[XMP] = application.rampExposure(xmps)
   application.exportXMPs(rampedXMPs)
 }

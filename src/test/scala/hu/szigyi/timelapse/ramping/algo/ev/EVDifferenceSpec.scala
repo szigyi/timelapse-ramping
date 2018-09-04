@@ -1,12 +1,11 @@
-package hu.szigyi.timelapse.ramping.algo
+package hu.szigyi.timelapse.ramping.algo.ev
 
 import hu.szigyi.timelapse.ramping.model.XMPSettings
-import org.scalatest.{Matchers, Outcome}
-import org.scalatest.fixture.FunSpec
-import BigDecimal._
 import hu.szigyi.timelapse.ramping.testutil.BigDecimalTestExtension._
+import org.scalatest.fixture.FunSpec
+import org.scalatest.{Matchers, Outcome}
 
-class EVDifferenceTest extends FunSpec with Matchers {
+class EVDifferenceSpec extends FunSpec with Matchers {
 
   override type FixtureParam = EVDifference
 

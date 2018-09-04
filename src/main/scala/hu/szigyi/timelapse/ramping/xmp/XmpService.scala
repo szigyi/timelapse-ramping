@@ -1,12 +1,13 @@
 package hu.szigyi.timelapse.ramping.xmp
 
-import java.io.{File, FileOutputStream}
+import java.io.File
 
+import breeze.interpolation.LinearInterpolator
 import com.drew.imaging.ImageMetadataReader._
 import com.drew.metadata.Metadata
-import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
+import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.algo.{MirrorPrevious, Ramp, RampBySeq}
+import hu.szigyi.timelapse.ramping.algo.ramp.{Interpolator, RampHelper}
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
 import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
@@ -15,7 +16,8 @@ class XmpService(cli: CLI,
                  ioUtil: IOUtil,
                  reader: Reader,
                  xmpParser: XmpParser,
-                 ramp: RampBySeq,
+                 rampHelper: RampHelper,
+                 ramp: Interpolator,
                  writer: Writer) extends LazyLogging {
 
   def getXMP(imageFile: File): XMP = {
@@ -23,10 +25,12 @@ class XmpService(cli: CLI,
     parseXMP(imageFile, metadata)
   }
 
-  def getEV(xmp: XMP): BigDecimal = ramp.EV(xmp)
-
-//  def rampExposure(base: XMP, current: XMP): BigDecimal = ramping.rampExposure(base, current)
-  def rampExposure(xmps: XMP*): BigDecimal = ramp.rampExposure(xmps: _*)
+  def rampExposure(xmps: Seq[XMP]): Seq[BigDecimal] = {
+    val EVs: Seq[BigDecimal] = xmps.map(xmp => rampHelper.toEV(xmp))
+    implicit val f = ramp.buildInterpolator(EVs)
+    val indicesOfXMPs = (0 to xmps.size - 1)
+    indicesOfXMPs.map(index => ramp.rampExposure(index)(f))
+  }
 
   def flushXMP(xmp: XMP): Unit = {
     val xmpStr = s"""
@@ -41,7 +45,7 @@ class XmpService(cli: CLI,
      """.stripMargin
 //    XmpWriter.write(new FileOutputStream(xmp.xmpFilePath), xmp.metadata)
     writer.write(xmp.xmpFilePath, xmpStr)
-    logger.info(s"XMP is created: ${xmp.xmpFilePath}")
+//    logger.info(s"XMP is created: ${xmp.xmpFilePath}")
   }
 
   private def parseXMP(imageFile: File, metadata: Metadata) = {
@@ -57,7 +61,7 @@ class XmpService(cli: CLI,
            """.stripMargin)
     }
 
-    val xmpFile = ioUtil.replaceExtension(imageFile, ".xmp")
+    val xmpFile = ioUtil.replaceExtension(imageFile, "xmp")
     val xmpSettings = parseXMPSettings(exifDir)
     XMP(xmpFile, xmpSettings)
   }
@@ -78,6 +82,7 @@ object XmpService {
             ioUtil: IOUtil,
             reader: Reader,
             xmpParser: XmpParser,
-            ramp: RampBySeq,
-            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, ramp, writer)
+            rampHelper: RampHelper,
+            ramp: Interpolator,
+            writer: Writer): XmpService = new XmpService(cli, ioUtil, reader, xmpParser, rampHelper, ramp, writer)
 }
