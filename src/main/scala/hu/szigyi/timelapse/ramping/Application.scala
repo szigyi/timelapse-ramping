@@ -47,7 +47,7 @@ class Application(xmpService: XmpService) extends LazyLogging {
     xmp.copy(settings = rampedSettings)
   }
 
-  private def updateWhiteBalance(xmp: XMP, wb: Option[Int]): XMP = {
+  private def updateWhiteBalance(xmp: XMP, wb: Int): XMP = {
     val rampedSettings = xmp.settings.copy(whiteBalance = wb)
     xmp.copy(settings = rampedSettings)
   }

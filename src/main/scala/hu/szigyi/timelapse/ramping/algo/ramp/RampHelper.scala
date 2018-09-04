@@ -38,7 +38,7 @@ class RampHelper(ev: EV) {
     val extendedData = data.head +: data
     extendedData
       .sliding(slidingWindow)
-      .map((window: Seq[BigDecimal]) => window.head - window(1))
+      .map((window: Seq[BigDecimal]) => window(1) - window.head)
       .toSeq
   }
 
@@ -126,6 +126,17 @@ class RampHelper(ev: EV) {
     if (shiftedIndices.head._1.equals(0)) shiftedIndices :+ (lastIndex, ZERO)
     else seq.head +: shiftedIndices :+ (lastIndex, ZERO)
   }
+
+  def toAbsolute(remaining: List[(Int, Int)], acc: List[(Int, Int)], prevOriginalWB: Int): Seq[(Int, Int)] = remaining match {
+    case Nil => acc
+    case head :: tail => {
+      val absoluteCurrentWB = head._2 + prevOriginalWB
+      val newAcc = acc :+ (head._1, absoluteCurrentWB)
+      toAbsolute(tail, newAcc, absoluteCurrentWB)
+    }
+  }
+
+  def negate(seq: Seq[(Int, BigDecimal)]): Seq[(Int, BigDecimal)] = seq.map((t: (Int, BigDecimal)) => (t._1, t._2 * -1))
 
   // TODO extract to an XMP related part, it does not belong to here
   def calculateEV(xmp: XMP): BigDecimal = ev.EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)

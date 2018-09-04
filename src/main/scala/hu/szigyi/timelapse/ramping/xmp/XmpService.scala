@@ -87,12 +87,11 @@ class XmpService(defaultConfig: DefaultConfig,
   }
 
   private def parseXMPSettings(exifDir: ExifSubIFDDirectory, canonDir: CanonMakernoteDirectory): XMPSettings = {
-
     val shutterSpeed = xmpParser.getShutterSpeed(exifDir)
     val aperture = xmpParser.getAperture(exifDir)
     val (exposure, isExists) = xmpParser.getExposure(exifDir)
     val iso = xmpParser.getISO(exifDir)
-    val wb = if (defaultConfig.rampWhiteBalance) Some(xmpParser.getTemperature(canonDir)) else None
+    val wb = xmpParser.getTemperature(canonDir)
 
     XMPSettings(iso, shutterSpeed, aperture, exposure, isExists, wb)
   }

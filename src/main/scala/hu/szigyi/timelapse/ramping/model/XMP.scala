@@ -15,7 +15,7 @@ case class XMPSettings(iso: Int,
                        shutterSpeed: BigDecimal,
                        aperture: BigDecimal,
                        exposure: BigDecimal,
-                       exposureExistsInXMP: Boolean,
-                       whiteBalance: Option[Int]) {
+                       exposureExistsInImage: Boolean,
+                       whiteBalance: Int) {
   override def toString: String = s"{iso: $iso, shutterSpeed: $shutterSpeed, aperture: $aperture, exposure: $exposure, wb: $whiteBalance}"
 }
