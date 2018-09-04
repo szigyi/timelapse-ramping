@@ -22,6 +22,9 @@ Main process
    * Creates the XMP (xml) files for every image where EV or WB has changed
    * Writes the XMP files next to the images in the folder
 
+Output
+   * XMP sidecar file for every image which was ramped
+
 ## TODO
    * [ ] Use predefined EV as well, not just the calculated one. Predefined one overwrites calculated one.
    * [ ] Set White Balance as well as the EV is set
@@ -39,9 +42,6 @@ Information that is not necessary
       * Aperture
    * The user should not provide if they are missing:
       * Exposure
-
-Output
-   * XMP sidecar file for every image which was ramped
 
 ## Caveats
    * Manual lens: If you used manual lens then you can provide the Aperture that you used, the F-number. Please do not modify the aperture during the timelapse, because there is no way right now to add manually a dynamic aperture data.
