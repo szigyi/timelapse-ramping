@@ -3,84 +3,75 @@ package hu.szigyi.timelapse.ramping.xmp
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.conf.DefaultConfig
 import kantan.xpath.{XPathError, XPathResult}
-import kantan.xpath.implicits._
 
 import scala.util.{Failure, Success, Try}
-
-import com.drew.imaging.ImageMetadataReader
-import com.drew.metadata.Metadata
+import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
 
 
 class XmpParser(default: DefaultConfig) extends LazyLogging {
 
   /**
-    * @param xmpAsString
-    * @return the parsed value or exception
+    * @param exifDir
+    * @return the parsed ExposureTime (Shutter Speed) or exception
     */
-  def getShutterSpeed(xmpAsString: String): BigDecimal = {
-    // TODO consider all the possible values that can hold this data like: cr2 tag
-    // TODO can get that from other tags
-    val shutterSpeedPath = xp"//*[local-name()='ExposureTime']"
-    val shutterSpeedStr = unliftOrError(xmpAsString.evalXPath[String](shutterSpeedPath),
-      s"ExposureTime is not found in the XMP")
-    calculateFromRationalNumber(shutterSpeedStr)
+  def getShutterSpeed(exifDir: ExifSubIFDDirectory): BigDecimal = {
+    val errorMsg = "ExposureTime is not found in the image!"
+    val shutterSpeedStr = nullToError(exifDir.getString(ExifDirectoryBase.TAG_EXPOSURE_TIME), errorMsg)
+    rationalToDecimal(shutterSpeedStr)
   }
 
   /**
-    * @param xmpAsString
+    * @param exifDir
     * @return the parsed ISO number or exception
     */
-  def getISO(xmpAsString: String): Int = {
-    // TODO consider all the possible values that can hold this data like: cr2 tag
-    val isoPath = xp"//*[local-name()='ISOSpeedRatings']/Seq/li[1]"
-    val xPathResult = xmpAsString.evalXPath[Int](isoPath)
-    unliftOrError(xPathResult, s"ISOSpeedRatings is not found in the XMP")
+  def getISO(exifDir: ExifSubIFDDirectory): Int = {
+    val errorMsg = "ISOSpeedRatings is not found in the image!"
+    nullToError(exifDir.getInt(ExifDirectoryBase.TAG_ISO_EQUIVALENT), errorMsg)
   }
 
   /**
     * If there is a default value for Aperture from Configuration
     * then it uses it. Otherwise it tries to parse the value from XMP.
-    * @param xmpAsString
-    * @return default aperture if provided or parsed value or exception
+    * @param exifDir
+    * @return default Aperture if provided or parsed F-Number or exception
     */
-  def getAperture(xmpAsString: String): BigDecimal = {
-    // TODO consider all the possible values that can hold this data like: cr2 tag
-    // TODO Can calculate from FNumber if that exists
-    val aperturePath = xp"//*[local-name()='ApertureValue']"
+  def getAperture(exifDir: ExifSubIFDDirectory): BigDecimal = {
+    val errorMsg = "F-Number is not found in the image and Default value ('DEFAULT_APERTURE') is not provided!"
+//    TAG_FNUMBER
     default.aperture match {
       case Some(aperture) => aperture
       case None => {
-        val apertureStr = xmpAsString.evalXPath[String](aperturePath)
-        val aperture = unliftOrError(apertureStr,
-          s"ApertureValue is not found in the XMP and there is no Default value ('DEFAULT_APERTURE') for it.")
-        calculateFromRationalNumber(aperture)
+        val apertureStr = exifDir.getString(ExifDirectoryBase.TAG_FNUMBER)
+        val aperture = nullToError(apertureStr, errorMsg)
+        rationalToDecimal(aperture)
       }
     }
   }
 
   /**
     * Exposure is not a required field. Therefore it uses the default value
-    * does not exists in the XMP.
-    * @param xmpAsString
+    * if it does not exists in the image.
+    * @param exifDir
     * @return
     */
-  def getExposure(xmpAsString: String): (BigDecimal, Boolean) = {
-    val exposureNotFoundMsg = "Exposure2012 is not found in the XMP."
+  def getExposure(exifDir: ExifSubIFDDirectory): (BigDecimal, Boolean) = {
+    val errorMsg = "Exposure2012 is not found in the image!"
     // TODO consider all the possible values that can hold this data like: cr2 tag
-    val exposurePath = xp"//*[local-name()='Exposure2012']"
-    val exposureTry = mapToTry(xmpAsString.evalXPath[BigDecimal](exposurePath))
-    exposureTry match {
-      case Success(exposure) => (exposure, true)
-      case Failure(_) => {
-        logger.trace(exposureNotFoundMsg)
-        (default.exposure, false)
-      }
-    }
+//    val exposureTry = mapToTry(exifDir.getString())
+//    exposureTry match {
+//      case Success(exposure) => (exposure, true)
+//      case Failure(_) => {
+//        logger.trace(errorMsg)
+//        (default.exposure, false)
+//      }
+//    }
+    (BigDecimal(0.0), false)
   }
 
-  private def unliftOrError[T](result: XPathResult[T], errorReason: String): T = result match {
-    case Right(r) => r
-    case Left(error: XPathError) => throw new RuntimeException(errorReason, error)
+  // TODO adding ClassTag to keep type information for runtime
+  private def nullToError[T](result: T, errorReason: String): T = result match {
+    case realResult: T => realResult
+    case null => throw new RuntimeException(errorReason)
   }
 
   private def mapToTry[T](result: XPathResult[T]): Try[T] = result match {
@@ -88,12 +79,22 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
     case Left(error: XPathError) => Failure(error)
   }
 
-  private def calculateFromRationalNumber(str: String): BigDecimal = {
+  private def rationalToDecimal(str: String): BigDecimal = {
     import math.BigDecimal._
-    val numDen = str.split("/")
-    val numerator = BigDecimal(numDen(0), defaultMathContext)
-    val denominator = BigDecimal(numDen(1), defaultMathContext)
-    numerator / denominator
+    /**
+      * If Rational's value in XML is less than 1/200 then it calculates the decimal value!
+      * {@link com.drew.lang.Rational#toSimpleString}
+      */
+    try {
+      BigDecimal(str, defaultMathContext)
+    } catch {
+      case _: NumberFormatException => {
+        val numDen = str.split("/")
+        val numerator = BigDecimal(numDen(0), defaultMathContext)
+        val denominator = BigDecimal(numDen(1), defaultMathContext)
+        numerator / denominator
+      }
+    }
   }
 }
 
