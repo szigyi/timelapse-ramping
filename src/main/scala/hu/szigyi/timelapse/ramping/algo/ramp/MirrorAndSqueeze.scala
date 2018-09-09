@@ -1,13 +1,13 @@
 package hu.szigyi.timelapse.ramping.algo.ramp
 
 import hu.szigyi.timelapse.ramping.algo.ev.EVDifference
-import hu.szigyi.timelapse.ramping.model.XMP
+import hu.szigyi.timelapse.ramping.model.EXIF
 
 class MirrorAndSqueeze(EVdiff: EVDifference, rampHelper: RampHelper) {
 
   private val squeeze = 0.9
 
-  def rampExposure(base: XMP, current: XMP): BigDecimal = {
+  def rampExposure(base: EXIF, current: EXIF): BigDecimal = {
     val shutterBias = EVdiff.fromShutterSpeeds(base.settings, current.settings)
     val apertureBias = EVdiff.fromApertures(base.settings, current.settings)
     val isoBias = EVdiff.fromISOs(base.settings, current.settings)

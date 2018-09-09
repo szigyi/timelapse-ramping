@@ -1,14 +1,13 @@
 package hu.szigyi.timelapse.ramping.xmp
 
+import com.drew.metadata.exif.makernotes.CanonMakernoteDirectory
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.conf.DefaultConfig
-import kantan.xpath.{XPathError, XPathResult}
 
-import scala.util.{Failure, Success, Try}
 import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
 
 
-class XmpParser(default: DefaultConfig) extends LazyLogging {
+class EXIFParser(default: DefaultConfig) extends LazyLogging {
 
   /**
     * @param exifDir
@@ -42,8 +41,8 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
       case Some(aperture) => aperture
       case None => {
         val apertureStr = exifDir.getString(ExifDirectoryBase.TAG_FNUMBER)
-        val aperture = nullToError(apertureStr, errorMsg)
-        rationalToDecimal(aperture)
+        val apertureTry = nullToError(apertureStr, errorMsg)
+        rationalToDecimal(apertureTry)
       }
     }
   }
@@ -56,7 +55,6 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
     */
   def getExposure(exifDir: ExifSubIFDDirectory): (BigDecimal, Boolean) = {
     val errorMsg = "Exposure2012 is not found in the image!"
-    // TODO consider all the possible values that can hold this data like: cr2 tag
 //    val exposureTry = mapToTry(exifDir.getString())
 //    exposureTry match {
 //      case Success(exposure) => (exposure, true)
@@ -65,20 +63,25 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
 //        (default.exposure, false)
 //      }
 //    }
-    (BigDecimal(0.0), false)
+    // TODO use actual exposure value
+    (BigDecimal("0"), false)
   }
 
-  // TODO adding ClassTag to keep type information for runtime
+  def getTemperature(canonDir: CanonMakernoteDirectory): Int = {
+    val colorData7 = 0x4001
+    val colorTempAsShot = 67
+    val errorMsg = "Temperature is not found in the image!"
+    // TODO error handling way before get int array's result
+    val wbInt = canonDir.getIntArray(colorData7)(colorTempAsShot)
+    nullToError(wbInt, errorMsg)
+  }
+
   private def nullToError[T](result: T, errorReason: String): T = result match {
     case realResult: T => realResult
     case null => throw new RuntimeException(errorReason)
   }
 
-  private def mapToTry[T](result: XPathResult[T]): Try[T] = result match {
-    case Right(r) => Success(r)
-    case Left(error: XPathError) => Failure(error)
-  }
-
+  // TODO revisit, method name is not good
   private def rationalToDecimal(str: String): BigDecimal = {
     import math.BigDecimal._
     /**
@@ -98,6 +101,6 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
   }
 }
 
-object XmpParser {
-  def apply(default: DefaultConfig): XmpParser = new XmpParser(default)
+object EXIFParser {
+  def apply(default: DefaultConfig): EXIFParser = new EXIFParser(default)
 }

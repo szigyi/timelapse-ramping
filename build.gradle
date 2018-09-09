@@ -18,6 +18,7 @@ ext {
     pureConfigVersion = "0.9.1"
     typesafeLoggingVersion = "3.9.0"
     logbackVersion = "1.2.3"
+    catsVersion = "0.9.0"
     xPathVersion = "0.4.0"
     bigMathVersion = "2.0.1"
     ringVersion = "2.5.1"
@@ -32,6 +33,7 @@ dependencies {
     compile group: 'com.typesafe.scala-logging', name: "scala-logging_$scalaMajorVersion", version: "$typesafeLoggingVersion"
     compile group: 'ch.qos.logback', name: 'logback-classic', version: "$logbackVersion"
 
+    compile group: 'org.typelevel', name: "cats_$scalaMajorVersion", version: "$catsVersion"
     compile group: 'com.nrinaudo', name: "kantan.xpath_$scalaMajorVersion", version: "$xPathVersion"
     compile group: 'ch.obermuhlner', name: 'big-math', version: "$bigMathVersion"
     compile group: 'cc.redberry', name: 'rings', version: "$ringVersion"

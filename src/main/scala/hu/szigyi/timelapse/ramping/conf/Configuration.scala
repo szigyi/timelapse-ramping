@@ -18,4 +18,5 @@ case class TimelapseRampingConfig(imagesConfig: ImagesConfig,
 case class ImagesConfig(supportedFileExtensions: List[String])
 
 case class DefaultConfig(aperture: Option[BigDecimal],
-                         exposure: BigDecimal)
+                         exposure: BigDecimal,
+                         rampWhiteBalance: Boolean)

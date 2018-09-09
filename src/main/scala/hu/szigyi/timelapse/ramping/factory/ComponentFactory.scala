@@ -6,7 +6,7 @@ import hu.szigyi.timelapse.ramping.algo.ev.{EV, EVDifference}
 import hu.szigyi.timelapse.ramping.algo.ramp.{AverageWindow, Interpolator, RampHelper}
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
-import hu.szigyi.timelapse.ramping.xmp.{XmpParser, XmpService}
+import hu.szigyi.timelapse.ramping.xmp.{EXIFParser, Service}
 
 trait ComponentFactory extends LazyLogging with ConfigurationFactory {
 
@@ -23,8 +23,8 @@ trait ComponentFactory extends LazyLogging with ConfigurationFactory {
 //  val rampAlgo = AverageWindow(ev)
   val rampAlgo = Interpolator(rampHelper)
 
-  val xmpParser = XmpParser(defaultConfig)
-  val xmpService = XmpService(cli, ioUtil, reader, xmpParser, rampHelper, rampAlgo, writer)
+  val exifParser = EXIFParser(defaultConfig)
+  val exifService = Service(defaultConfig, cli, ioUtil, reader, exifParser, rampHelper, rampAlgo, writer)
 
-  val application = Application(xmpService)
+  val application = Application(exifService)
 }
