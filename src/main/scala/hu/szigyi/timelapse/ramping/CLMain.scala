@@ -26,6 +26,6 @@ object CLMain extends App with LazyLogging with ComponentFactory {
 //    case Valid(xmps: XMP) =>
 //  }
   private val rampedEVs: Seq[EXIF] = application.rampExposure(xmps)
-  private val rampedWBs: Seq[EXIF] = if (defaultConfig.rampWhiteBalance) application.rampWhiteBalance(rampedEVs) else rampedEVs
+  private val rampedWBs: Seq[EXIF] = if (defaultConfig.rampWhiteBalance) application.rampTemperature(rampedEVs) else rampedEVs
   application.exportXMPs(rampedWBs)
 }

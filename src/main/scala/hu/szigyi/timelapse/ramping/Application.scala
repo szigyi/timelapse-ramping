@@ -9,47 +9,47 @@ import hu.szigyi.timelapse.ramping.xmp.Service
 import cats.data._
 
 
-class Application(xmpService: Service) extends LazyLogging {
+class Application(service: Service) extends LazyLogging {
 
-  def readEXIFs(imageFiles: Seq[File]): Seq[EXIF] = imageFiles.map(imageFile => xmpService.getEXIF(imageFile))
+  def readEXIFs(imageFiles: Seq[File]): Seq[EXIF] = imageFiles.map(imageFile => service.getEXIF(imageFile))
 
-  def validate(xmps: Seq[EXIF]): Validated[Seq[ValidatedNel[String, EXIF]], Seq[EXIF]] = {
+  def validate(exifs: Seq[EXIF]): Validated[Seq[ValidatedNel[String, EXIF]], Seq[EXIF]] = {
     null
   }
 
-  def rampExposure(xmps: Seq[EXIF]): Seq[EXIF] = {
-    val rampedEVs = xmpService.rampExposure(xmps)
+  def rampExposure(exifs: Seq[EXIF]): Seq[EXIF] = {
+    val rampedEVs = service.rampExposure(exifs)
 
-    val rampedXMPs = xmps.zip(rampedEVs).map {
-      case (xmp: EXIF, rampedEV: BigDecimal) => updateExposure(xmp, rampedEV)
+    val rampedEXIFs = exifs.zip(rampedEVs).map {
+      case (exif: EXIF, rampedEV: BigDecimal) => updateExposure(exif, rampedEV)
     }
 //    rampedXMPs.foreach(xmp => logger.info(xmp.settings.exposure.toString))
-    rampedXMPs
+    rampedEXIFs
   }
 
-  def rampWhiteBalance(xmps: Seq[EXIF]): Seq[EXIF] = {
-    val rampedWBs = xmpService.rampWhiteBalance(xmps)
+  def rampTemperature(exifs: Seq[EXIF]): Seq[EXIF] = {
+    val rampedWBs = service.rampWhiteBalance(exifs)
 
-    val rampedXMPs = xmps.zip(rampedWBs).map{
-      case (xmp: EXIF, rampedWB: Int) => updateWhiteBalance(xmp, rampedWB)
+    val rampedEXIFs = exifs.zip(rampedWBs).map{
+      case (exif: EXIF, rampedWB: Int) => updateTemperature(exif, rampedWB)
     }
-    rampedXMPs.foreach(xmp => logger.info(xmp.settings.whiteBalance.toString))
-    rampedXMPs
+    rampedEXIFs.foreach(exif => logger.info(exif.settings.temperature.toString))
+    rampedEXIFs
   }
 
-  def exportXMPs(xmps: Seq[EXIF]): Unit = xmps.foreach(xmp => xmpService.flushXMP(xmp))
+  def exportXMPs(exifs: Seq[EXIF]): Unit = exifs.foreach(exif => service.flushXMP(exif))
 
-  private def updateExposure(xmp: EXIF, exposure: BigDecimal): EXIF = {
-    val rampedSettings = xmp.settings.copy(exposure = exposure)
-    xmp.copy(settings = rampedSettings)
+  private def updateExposure(exif: EXIF, exposure: BigDecimal): EXIF = {
+    val rampedSettings = exif.settings.copy(exposure = exposure)
+    exif.copy(settings = rampedSettings)
   }
 
-  private def updateWhiteBalance(xmp: EXIF, wb: Int): EXIF = {
-    val rampedSettings = xmp.settings.copy(whiteBalance = wb)
-    xmp.copy(settings = rampedSettings)
+  private def updateTemperature(exif: EXIF, temperature: Int): EXIF = {
+    val rampedSettings = exif.settings.copy(temperature = temperature)
+    exif.copy(settings = rampedSettings)
   }
 }
 
 object Application {
-  def apply(xmpService: Service): Application = new Application(xmpService)
+  def apply(service: Service): Application = new Application(service)
 }

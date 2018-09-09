@@ -35,7 +35,7 @@ class Service(defaultConfig: DefaultConfig,
   }
 
   def rampWhiteBalance(exifs: Seq[EXIF]): Seq[Int] = {
-    val f = ramp.buildWBInterpolator(exifs.map(exif => exif.settings.whiteBalance))
+    val f = ramp.buildWBInterpolator(exifs.map(exif => exif.settings.temperature))
     val indicesOfEXIFs = (0 to exifs.size - 1)
     val rampedWBs = indicesOfEXIFs.map(index => (ramp.interpolate(index)(f)).toInt)
     rampedWBs
@@ -46,9 +46,11 @@ class Service(defaultConfig: DefaultConfig,
        |<x:xmpmeta xmlns:x='adobe:ns:meta/' x:xmptk='hu.szigyi.timelapse.ramping'>
        |<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
        | <rdf:Description rdf:about=''
-       |  xmlns:crs='http://ns.adobe.com/camera-raw-settings/1.0/'>
-       |  <crs:Exposure2012>${exif.settings.exposure}</crs:Exposure2012>
-       |  <crs:Temperature>${exif.settings.whiteBalance}</crs:Temperature>
+       |  xmlns:crs='http://ns.adobe.com/camera-raw-settings/1.0/'
+       |  crs:Exposure2012="${exif.settings.exposure}"
+       |  crs:Temperature="${exif.settings.temperature}"
+       |  crs:Tint="0"
+       |  >
        | </rdf:Description>
        |</rdf:RDF>
        |</x:xmpmeta>
