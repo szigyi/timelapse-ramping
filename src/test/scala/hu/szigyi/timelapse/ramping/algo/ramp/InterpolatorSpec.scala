@@ -43,7 +43,7 @@ class InterpolatorSpec extends fixture.FunSpec with Matchers {
 
       val f = int.buildEVInterpolator(EVs)
       val indicesOfXMPs = (0 to EVs.size - 1)
-      val result = indicesOfXMPs.map(index => int.interpolateBigDecimal(index)(f))
+      val result = indicesOfXMPs.map(index => int.interpolate(index)(f))
 
       result shouldEqual expected
     }
@@ -52,6 +52,7 @@ class InterpolatorSpec extends fixture.FunSpec with Matchers {
   describe("WB Interpolator test") {
     it("should return a real life example result") { int =>
       val WBs = Seq(
+        4300,
         4300,
         4300,
         4800,
@@ -72,11 +73,12 @@ class InterpolatorSpec extends fixture.FunSpec with Matchers {
         5200,
         4050,
         2900,
+        2900
       )
 
       val f = int.buildWBInterpolator(WBs)
       val indicesOfXMPs = (0 to WBs.size - 1)
-      val result = indicesOfXMPs.map(index => int.interpolateInt(index)(f))
+      val result = indicesOfXMPs.map(index => (int.interpolate(index)(f)).toInt)
 
       result shouldEqual expected
     }

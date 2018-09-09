@@ -3,56 +3,53 @@ package hu.szigyi.timelapse.ramping
 import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.model.XMP
-import hu.szigyi.timelapse.ramping.xmp.XmpService
+import hu.szigyi.timelapse.ramping.model.EXIF
+import hu.szigyi.timelapse.ramping.xmp.Service
 
 import cats.data._
-import cats.data.Validated._
-import cats.implicits._
 
 
-class Application(xmpService: XmpService) extends LazyLogging {
+class Application(xmpService: Service) extends LazyLogging {
 
-  def readXMPs(imageFiles: Seq[File]): Seq[XMP] = imageFiles.map(imageFile => xmpService.getXMP(imageFile))
+  def readEXIFs(imageFiles: Seq[File]): Seq[EXIF] = imageFiles.map(imageFile => xmpService.getEXIF(imageFile))
 
-  def validate(xmps: Seq[XMP]): Validated[Seq[ValidatedNel[String, XMP]], Seq[XMP]] = {
+  def validate(xmps: Seq[EXIF]): Validated[Seq[ValidatedNel[String, EXIF]], Seq[EXIF]] = {
     null
   }
 
-  def rampExposure(xmps: Seq[XMP]): Seq[XMP] = {
+  def rampExposure(xmps: Seq[EXIF]): Seq[EXIF] = {
     val rampedEVs = xmpService.rampExposure(xmps)
 
     val rampedXMPs = xmps.zip(rampedEVs).map {
-      case (xmp: XMP, rampedEV: BigDecimal) => updateExposure(xmp, rampedEV)
+      case (xmp: EXIF, rampedEV: BigDecimal) => updateExposure(xmp, rampedEV)
     }
 //    rampedXMPs.foreach(xmp => logger.info(xmp.settings.exposure.toString))
     rampedXMPs
   }
 
-  def rampWhiteBalance(xmps: Seq[XMP]): Seq[XMP] = {
+  def rampWhiteBalance(xmps: Seq[EXIF]): Seq[EXIF] = {
     val rampedWBs = xmpService.rampWhiteBalance(xmps)
 
     val rampedXMPs = xmps.zip(rampedWBs).map{
-//      case (xmp: XMP, rampedWB: Int) => updateWhiteBalance(xmp, rampedWB)
-      case (xmp: XMP, rampedWB: Int) => xmp
+      case (xmp: EXIF, rampedWB: Int) => updateWhiteBalance(xmp, rampedWB)
     }
     rampedXMPs.foreach(xmp => logger.info(xmp.settings.whiteBalance.toString))
     rampedXMPs
   }
 
-  def exportXMPs(xmps: Seq[XMP]): Unit = xmps.foreach(xmp => xmpService.flushXMP(xmp))
+  def exportXMPs(xmps: Seq[EXIF]): Unit = xmps.foreach(xmp => xmpService.flushXMP(xmp))
 
-  private def updateExposure(xmp: XMP, exposure: BigDecimal): XMP = {
+  private def updateExposure(xmp: EXIF, exposure: BigDecimal): EXIF = {
     val rampedSettings = xmp.settings.copy(exposure = exposure)
     xmp.copy(settings = rampedSettings)
   }
 
-  private def updateWhiteBalance(xmp: XMP, wb: Int): XMP = {
+  private def updateWhiteBalance(xmp: EXIF, wb: Int): EXIF = {
     val rampedSettings = xmp.settings.copy(whiteBalance = wb)
     xmp.copy(settings = rampedSettings)
   }
 }
 
 object Application {
-  def apply(xmpService: XmpService): Application = new Application(xmpService)
+  def apply(xmpService: Service): Application = new Application(xmpService)
 }

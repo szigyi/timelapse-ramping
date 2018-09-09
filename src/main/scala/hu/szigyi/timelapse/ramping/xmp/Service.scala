@@ -11,50 +11,50 @@ import hu.szigyi.timelapse.ramping.algo.ramp.{Interpolator, RampHelper}
 import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.conf.{DefaultConfig}
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
-import hu.szigyi.timelapse.ramping.model.{XMP, XMPSettings}
+import hu.szigyi.timelapse.ramping.model.{EXIF, EXIFSettings}
 
-class XmpService(defaultConfig: DefaultConfig,
-                 cli: CLI,
-                 ioUtil: IOUtil,
-                 reader: Reader,
-                 xmpParser: XmpParser,
-                 rampHelper: RampHelper,
-                 ramp: Interpolator,
-                 writer: Writer) extends LazyLogging {
+class Service(defaultConfig: DefaultConfig,
+              cli: CLI,
+              ioUtil: IOUtil,
+              reader: Reader,
+              exifParser: EXIFParser,
+              rampHelper: RampHelper,
+              ramp: Interpolator,
+              writer: Writer) extends LazyLogging {
 
-  def getXMP(imageFile: File): XMP = {
+  def getEXIF(imageFile: File): EXIF = {
     val metadata: Metadata = readMetadata(imageFile)
     parseXMP(imageFile, metadata)
   }
 
-  def rampExposure(xmps: Seq[XMP]): Seq[BigDecimal] = {
-    val EVs: Seq[BigDecimal] = xmps.map(xmp => rampHelper.calculateEV(xmp))
+  def rampExposure(exifs: Seq[EXIF]): Seq[BigDecimal] = {
+    val EVs: Seq[BigDecimal] = exifs.map(exif => rampHelper.calculateEV(exif))
     implicit val f = ramp.buildEVInterpolator(EVs)
-    val indicesOfXMPs = (0 to xmps.size - 1)
-    indicesOfXMPs.map(index => ramp.interpolateBigDecimal(index)(f))
+    val indicesOfEXIFs = (0 to exifs.size - 1)
+    indicesOfEXIFs.map(index => ramp.interpolate(index)(f))
   }
 
-  def rampWhiteBalance(xmps: Seq[XMP]): Seq[Int] = {
-    val f = ramp.buildWBInterpolator(xmps.map(xmp => xmp.settings.whiteBalance))
-    val indicesOfXMPs = (0 to xmps.size - 1)
-    val rampedWBs = indicesOfXMPs.map(index => ramp.interpolateInt(index)(f))
+  def rampWhiteBalance(exifs: Seq[EXIF]): Seq[Int] = {
+    val f = ramp.buildWBInterpolator(exifs.map(exif => exif.settings.whiteBalance))
+    val indicesOfEXIFs = (0 to exifs.size - 1)
+    val rampedWBs = indicesOfEXIFs.map(index => (ramp.interpolate(index)(f)).toInt)
     rampedWBs
   }
 
-  def flushXMP(xmp: XMP): Unit = {
+  def flushXMP(exif: EXIF): Unit = {
     val xmpStr = s"""
        |<x:xmpmeta xmlns:x='adobe:ns:meta/' x:xmptk='hu.szigyi.timelapse.ramping'>
        |<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
        | <rdf:Description rdf:about=''
        |  xmlns:crs='http://ns.adobe.com/camera-raw-settings/1.0/'>
-       |  <crs:Exposure2012>${xmp.settings.exposure}</crs:Exposure2012>
-       |  <crs:Temperature>${xmp.settings.whiteBalance}</crs:Temperature>
+       |  <crs:Exposure2012>${exif.settings.exposure}</crs:Exposure2012>
+       |  <crs:Temperature>${exif.settings.whiteBalance}</crs:Temperature>
        | </rdf:Description>
        |</rdf:RDF>
        |</x:xmpmeta>
      """.stripMargin
 //    XmpWriter.write(new FileOutputStream(xmp.xmpFilePath), xmp.metadata)
-    writer.write(xmp.xmpFilePath, xmpStr)
+    writer.write(exif.xmpFilePath, xmpStr)
 //    logger.info(s"XMP is created: ${xmp.xmpFilePath}")
   }
 
@@ -63,10 +63,10 @@ class XmpService(defaultConfig: DefaultConfig,
     // TODO get the right Dir, you can use the exif tag to find out what the brand of the camera, or use ENV variable by user
     val canonDir = getMetadataDirectory(imageFile, metadata, classOf[CanonMakernoteDirectory])
 
-    val xmpSettings = parseXMPSettings(exifDir, canonDir)
+    val exifSettings = parseEXIFSettings(exifDir, canonDir)
 
     val xmpFile = ioUtil.replaceExtension(imageFile, "xmp")
-    XMP(xmpFile, xmpSettings)
+    EXIF(xmpFile, exifSettings)
   }
 
   private def getMetadataDirectory[T <: Directory](file: File, metadata: Metadata, clazz: Class[T]): T = {
@@ -86,24 +86,24 @@ class XmpService(defaultConfig: DefaultConfig,
     }
   }
 
-  private def parseXMPSettings(exifDir: ExifSubIFDDirectory, canonDir: CanonMakernoteDirectory): XMPSettings = {
-    val shutterSpeed = xmpParser.getShutterSpeed(exifDir)
-    val aperture = xmpParser.getAperture(exifDir)
-    val (exposure, isExists) = xmpParser.getExposure(exifDir)
-    val iso = xmpParser.getISO(exifDir)
-    val wb = xmpParser.getTemperature(canonDir)
+  private def parseEXIFSettings(exifDir: ExifSubIFDDirectory, canonDir: CanonMakernoteDirectory): EXIFSettings = {
+    val shutterSpeed = exifParser.getShutterSpeed(exifDir)
+    val aperture = exifParser.getAperture(exifDir)
+    val (exposure, isExists) = exifParser.getExposure(exifDir)
+    val iso = exifParser.getISO(exifDir)
+    val wb = exifParser.getTemperature(canonDir)
 
-    XMPSettings(iso, shutterSpeed, aperture, exposure, isExists, wb)
+    EXIFSettings(iso, shutterSpeed, aperture, exposure, isExists, wb)
   }
 }
 
-object XmpService {
+object Service {
   def apply(defaultConfig: DefaultConfig,
             cli: CLI,
             ioUtil: IOUtil,
             reader: Reader,
-            xmpParser: XmpParser,
+            exifParser: EXIFParser,
             rampHelper: RampHelper,
             ramp: Interpolator,
-            writer: Writer): XmpService = new XmpService(defaultConfig, cli, ioUtil, reader, xmpParser, rampHelper, ramp, writer)
+            writer: Writer): Service = new Service(defaultConfig, cli, ioUtil, reader, exifParser, rampHelper, ramp, writer)
 }

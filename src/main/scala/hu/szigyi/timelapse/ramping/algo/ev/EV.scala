@@ -3,7 +3,7 @@ package hu.szigyi.timelapse.ramping.algo.ev
 import ch.obermuhlner.math.big.BigDecimalMath._
 import hu.szigyi.timelapse.ramping.math.BigDecimalConverter._
 import hu.szigyi.timelapse.ramping.math.BigDecimalDecorator._
-import hu.szigyi.timelapse.ramping.model.XMP
+import hu.szigyi.timelapse.ramping.model.EXIF
 
 import scala.math.BigDecimal._
 import scala.math._

@@ -7,7 +7,7 @@ import hu.szigyi.timelapse.ramping.conf.DefaultConfig
 import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
 
 
-class XmpParser(default: DefaultConfig) extends LazyLogging {
+class EXIFParser(default: DefaultConfig) extends LazyLogging {
 
   /**
     * @param exifDir
@@ -101,6 +101,6 @@ class XmpParser(default: DefaultConfig) extends LazyLogging {
   }
 }
 
-object XmpParser {
-  def apply(default: DefaultConfig): XmpParser = new XmpParser(default)
+object EXIFParser {
+  def apply(default: DefaultConfig): EXIFParser = new EXIFParser(default)
 }

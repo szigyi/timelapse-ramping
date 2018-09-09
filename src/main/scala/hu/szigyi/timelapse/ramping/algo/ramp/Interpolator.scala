@@ -20,7 +20,8 @@ class Interpolator(rampHelper: RampHelper) extends LazyLogging {
     val relativeChanges: Seq[BigDecimal] = rampHelper.relativeChangesInData(data)
     val squashedChanges: Seq[(Int, BigDecimal)] = rampHelper.removeNonBoundaryZeros(relativeChanges)
     val shiftedChanges: Seq[(Int, BigDecimal)] = rampHelper.shiftSequenceIndices(squashedChanges)
-    shiftedChanges
+    val absoluteChanges: Seq[(Int, BigDecimal)] = rampHelper.toAbsolute(shiftedChanges.toList, Nil, data.head)
+    absoluteChanges
   }
 
   def buildEVInterpolator(EVs: Seq[BigDecimal]): LinearInterpolator[Double] = {
@@ -31,25 +32,18 @@ class Interpolator(rampHelper: RampHelper) extends LazyLogging {
     LinearInterpolator(x, y)
   }
 
-  def buildWBInterpolator(WBs: Seq[Int]): LinearInterpolator[Int] = {
-    val preparedEVs: Seq[(Int, Int)] = prepareForWBInterpolation(WBs.map(wb => BigDecimal(wb)))
+  def buildWBInterpolator(WBs: Seq[Int]): LinearInterpolator[Double] = {
+    val preparedWBs: Seq[(Int, Int)] = prepareForWBInterpolation(WBs.map(wb => BigDecimal(wb)))
       .map((wb: (Int, BigDecimal)) => (wb._1, wb._2.toInt))
-    val absoluteValuesOfWBs: Seq[(Int, Int)] = rampHelper.toAbsolute(preparedEVs.toList, Nil, WBs.head)
-    logger.info(s"${absoluteValuesOfWBs.toList}")
 
-    val x: DenseVector[Int] = DenseVector(absoluteValuesOfWBs.map(_._1.toInt): _*)
-    val y: DenseVector[Int] = DenseVector(absoluteValuesOfWBs.map(_._2.toInt): _*)
+    val x: DenseVector[Double] = DenseVector(preparedWBs.map(_._1.toDouble): _*)
+    val y: DenseVector[Double] = DenseVector(preparedWBs.map(_._2.toDouble): _*)
     LinearInterpolator(x, y)
   }
 
-  def interpolateBigDecimal(index: Int)(f: LinearInterpolator[Double]): BigDecimal = {
+  def interpolate(index: Int)(f: LinearInterpolator[Double]): BigDecimal = {
     val interpolated = f(index)
     BigDecimal(interpolated)
-  }
-
-  def interpolateInt(index: Int)(f: LinearInterpolator[Int]): Int = {
-    val interpolated = f(index)
-    interpolated
   }
 }
 

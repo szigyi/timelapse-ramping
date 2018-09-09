@@ -1,9 +1,9 @@
 package hu.szigyi.timelapse.ramping.algo.ramp
 
 import hu.szigyi.timelapse.ramping.algo.ev.EV
-import hu.szigyi.timelapse.ramping.model.XMP
+import hu.szigyi.timelapse.ramping.model.EXIF
 
-import scala.math.{BigDecimal}
+import scala.math.{BigDecimal, ScalaNumber}
 import hu.szigyi.timelapse.ramping.math.BigDecimalDecorator._
 
 
@@ -127,10 +127,10 @@ class RampHelper(ev: EV) {
     else seq.head +: shiftedIndices :+ (lastIndex, ZERO)
   }
 
-  def toAbsolute(remaining: List[(Int, Int)], acc: List[(Int, Int)], prevOriginalWB: Int): Seq[(Int, Int)] = remaining match {
+  def toAbsolute(remaining: List[(Int, BigDecimal)], acc: List[(Int, BigDecimal)], originalAbsolute: BigDecimal): Seq[(Int, BigDecimal)] = remaining match {
     case Nil => acc
     case head :: tail => {
-      val absoluteCurrentWB = head._2 + prevOriginalWB
+      val absoluteCurrentWB = head._2 + originalAbsolute
       val newAcc = acc :+ (head._1, absoluteCurrentWB)
       toAbsolute(tail, newAcc, absoluteCurrentWB)
     }
@@ -139,7 +139,7 @@ class RampHelper(ev: EV) {
   def negate(seq: Seq[(Int, BigDecimal)]): Seq[(Int, BigDecimal)] = seq.map((t: (Int, BigDecimal)) => (t._1, t._2 * -1))
 
   // TODO extract to an XMP related part, it does not belong to here
-  def calculateEV(xmp: XMP): BigDecimal = ev.EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)
+  def calculateEV(xmp: EXIF): BigDecimal = ev.EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)
 
 //  implicit class RichXMP(val xmp: XMP) extends AnyVal{
 //    def toEV: BigDecimal = EV().EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)

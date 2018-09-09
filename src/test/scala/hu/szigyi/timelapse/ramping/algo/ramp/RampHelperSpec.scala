@@ -155,8 +155,8 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
   describe("Convert changes to absolute") {
     it("should return the absolute values when changes are positive") { helper =>
       val base = 4000
-      val sequence = List((0, 0), (3, 200), (6, 100), (8, 600))
-      val expected = List((0, 4000), (3, 4200), (6, 4300), (8, 4900))
+      val sequence = List(bd(0, "0"), bd(3, "200"), bd(6, "100"), bd(8, "600"))
+      val expected = List(bd(0, "4000"), bd(3, "4200"), bd(6, "4300"), bd(8, "4900"))
 
       val result = helper.toAbsolute(sequence, Nil, base)
 
@@ -165,8 +165,8 @@ class RampHelperSpec extends fixture.FunSpec with Matchers {
 
     it("should return the absolute values when changes are mixed, positive and negative") { helper =>
       val base = 4000
-      val sequence = List((0, 0), (3, -200), (6, -100), (8, 600))
-      val expected = List((0, 4000), (3, 3800), (6, 3700), (8, 4300))
+      val sequence = List(bd(0, "0"), bd(3, "-200"), bd(6, "-100"), bd(8, "600"))
+      val expected = List(bd(0, "4000"), bd(3, "3800"), bd(6, "3700"), bd(8, "4300"))
 
       val result = helper.toAbsolute(sequence, Nil, base)
 
