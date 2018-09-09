@@ -16,11 +16,11 @@ class Interpolator(rampHelper: RampHelper) extends LazyLogging {
     negated
   }
 
-  private def prepareForWBInterpolation(data: Seq[BigDecimal]): Seq[(Int, BigDecimal)] = {
+  private def prepareForTemperatureInterpolation(data: Seq[BigDecimal]): Seq[(Int, BigDecimal)] = {
     val relativeChanges: Seq[BigDecimal] = rampHelper.relativeChangesInData(data)
     val squashedChanges: Seq[(Int, BigDecimal)] = rampHelper.removeNonBoundaryZeros(relativeChanges)
-    val shiftedChanges: Seq[(Int, BigDecimal)] = rampHelper.shiftSequenceIndices(squashedChanges)
-    val absoluteChanges: Seq[(Int, BigDecimal)] = rampHelper.toAbsolute(shiftedChanges.toList, Nil, data.head)
+//    val shiftedChanges: Seq[(Int, BigDecimal)] = rampHelper.shiftSequenceIndices(squashedChanges)
+    val absoluteChanges: Seq[(Int, BigDecimal)] = rampHelper.toAbsolute(squashedChanges.toList, Nil, data.head)
     absoluteChanges
   }
 
@@ -32,12 +32,12 @@ class Interpolator(rampHelper: RampHelper) extends LazyLogging {
     LinearInterpolator(x, y)
   }
 
-  def buildWBInterpolator(WBs: Seq[Int]): LinearInterpolator[Double] = {
-    val preparedWBs: Seq[(Int, Int)] = prepareForWBInterpolation(WBs.map(wb => BigDecimal(wb)))
-      .map((wb: (Int, BigDecimal)) => (wb._1, wb._2.toInt))
+  def buildTemperatureInterpolator(temps: Seq[Int]): LinearInterpolator[Double] = {
+    val preparedTemps: Seq[(Int, Int)] = prepareForTemperatureInterpolation(temps.map(temp => BigDecimal(temp)))
+      .map((temp: (Int, BigDecimal)) => (temp._1, temp._2.toInt))
 
-    val x: DenseVector[Double] = DenseVector(preparedWBs.map(_._1.toDouble): _*)
-    val y: DenseVector[Double] = DenseVector(preparedWBs.map(_._2.toDouble): _*)
+    val x: DenseVector[Double] = DenseVector(preparedTemps.map(_._1.toDouble): _*)
+    val y: DenseVector[Double] = DenseVector(preparedTemps.map(_._2.toDouble): _*)
     LinearInterpolator(x, y)
   }
 

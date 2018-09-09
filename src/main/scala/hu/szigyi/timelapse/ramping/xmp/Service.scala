@@ -34,11 +34,11 @@ class Service(defaultConfig: DefaultConfig,
     indicesOfEXIFs.map(index => ramp.interpolate(index)(f))
   }
 
-  def rampWhiteBalance(exifs: Seq[EXIF]): Seq[Int] = {
-    val f = ramp.buildWBInterpolator(exifs.map(exif => exif.settings.temperature))
+  def rampTemperature(exifs: Seq[EXIF]): Seq[Int] = {
+    val f = ramp.buildTemperatureInterpolator(exifs.map(exif => exif.settings.temperature))
     val indicesOfEXIFs = (0 to exifs.size - 1)
-    val rampedWBs = indicesOfEXIFs.map(index => (ramp.interpolate(index)(f)).toInt)
-    rampedWBs
+    val rampedTemps = indicesOfEXIFs.map(index => (ramp.interpolate(index)(f)).toInt)
+    rampedTemps
   }
 
   def flushXMP(exif: EXIF): Unit = {

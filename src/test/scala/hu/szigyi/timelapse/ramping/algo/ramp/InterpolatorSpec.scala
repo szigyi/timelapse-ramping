@@ -49,7 +49,7 @@ class InterpolatorSpec extends fixture.FunSpec with Matchers {
     }
   }
 
-  describe("WB Interpolator test") {
+  describe("Temperature Interpolator test") {
     it("should return a real life example result") { int =>
       val WBs = Seq(
         4300,
@@ -65,18 +65,56 @@ class InterpolatorSpec extends fixture.FunSpec with Matchers {
       )
       val expected = Seq(
         4300,
-        4550,
+        4466,
+        4633,
         4800,
         4900,
         5000,
         5100,
         5200,
         4050,
-        2900,
         2900
       )
 
-      val f = int.buildWBInterpolator(WBs)
+      val f = int.buildTemperatureInterpolator(WBs)
+      val indicesOfXMPs = (0 to WBs.size - 1)
+      val result = indicesOfXMPs.map(index => (int.interpolate(index)(f)).toInt)
+
+      result shouldEqual expected
+    }
+    it("long building up change") { int =>
+      val WBs = Seq(
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        3000,
+        3000,
+        3000
+      )
+      val expected = Seq(
+        2000,
+        2100,
+        2200,
+        2300,
+        2400,
+        2500,
+        2600,
+        2700,
+        2800,
+        2900,
+        3000,
+        3000,
+        3000
+      )
+
+      val f = int.buildTemperatureInterpolator(WBs)
       val indicesOfXMPs = (0 to WBs.size - 1)
       val result = indicesOfXMPs.map(index => (int.interpolate(index)(f)).toInt)
 

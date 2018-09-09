@@ -16,7 +16,6 @@ case class EXIFSettings(iso: Int,
                         aperture: BigDecimal,
                         exposure: BigDecimal,
                         exposureExistsInImage: Boolean,
-                        temperature: Int,
-                        tint: Int) {
+                        temperature: Int) {
   override def toString: String = s"{iso: $iso, shutterSpeed: $shutterSpeed, aperture: $aperture, exposure: $exposure, temperature: $temperature}"
 }

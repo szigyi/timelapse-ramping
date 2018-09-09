@@ -28,9 +28,9 @@ class Application(service: Service) extends LazyLogging {
   }
 
   def rampTemperature(exifs: Seq[EXIF]): Seq[EXIF] = {
-    val rampedWBs = service.rampWhiteBalance(exifs)
+    val rampedTemps = service.rampTemperature(exifs)
 
-    val rampedEXIFs = exifs.zip(rampedWBs).map{
+    val rampedEXIFs = exifs.zip(rampedTemps).map{
       case (exif: EXIF, rampedWB: Int) => updateTemperature(exif, rampedWB)
     }
     rampedEXIFs.foreach(exif => logger.info(exif.settings.temperature.toString))
