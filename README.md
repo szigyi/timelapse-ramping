@@ -26,6 +26,8 @@ Output
    * XMP sidecar file for every image which was ramped
 
 ## TODO
+   * [ ] Add anti-flickering
+   * [ ] Use run script which uses the built jar
    * [ ] Use predefined EV as well, not just the calculated one. Predefined one overwrites calculated one.
    * [ ] Set White Balance as well as the EV is set
    * [ ] Improve XMP file writer. It should not be so drastic to overwrite everything. It should just enhance if there is an existing XMP.
