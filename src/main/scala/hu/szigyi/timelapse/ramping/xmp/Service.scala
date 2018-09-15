@@ -8,13 +8,11 @@ import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.drew.metadata.exif.makernotes.CanonMakernoteDirectory
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.algo.ramp.{Interpolator, RampHelper}
-import hu.szigyi.timelapse.ramping.cli.CLI
 import hu.szigyi.timelapse.ramping.conf.{DefaultConfig}
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
 import hu.szigyi.timelapse.ramping.model.{EXIF, EXIFSettings}
 
 class Service(defaultConfig: DefaultConfig,
-              cli: CLI,
               ioUtil: IOUtil,
               reader: Reader,
               exifParser: EXIFParser,
@@ -101,11 +99,10 @@ class Service(defaultConfig: DefaultConfig,
 
 object Service {
   def apply(defaultConfig: DefaultConfig,
-            cli: CLI,
             ioUtil: IOUtil,
             reader: Reader,
             exifParser: EXIFParser,
             rampHelper: RampHelper,
             ramp: Interpolator,
-            writer: Writer): Service = new Service(defaultConfig, cli, ioUtil, reader, exifParser, rampHelper, ramp, writer)
+            writer: Writer): Service = new Service(defaultConfig, ioUtil, reader, exifParser, rampHelper, ramp, writer)
 }

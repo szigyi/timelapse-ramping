@@ -8,7 +8,7 @@ case class EXIF(xmpFilePath: File,
                 settings: EXIFSettings) {
   override def toString: String =
     s"""
-       |XMP($settings, $xmpFilePath)""".stripMargin
+       |EXIF($settings, $xmpFilePath)""".stripMargin
 }
 
 case class EXIFSettings(iso: Int,

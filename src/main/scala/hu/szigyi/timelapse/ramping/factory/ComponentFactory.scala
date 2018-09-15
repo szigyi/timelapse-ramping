@@ -13,18 +13,13 @@ trait ComponentFactory extends LazyLogging with ConfigurationFactory {
   val ioUtil = IOUtil()
   val reader = Reader(ioUtil)
   val writer = Writer()
-  val cli = CLI()
 
   private val ev = EV()
-  private val evDiff = EVDifference(ev)
   private val rampHelper = RampHelper(ev)
-//  val rampAlgo = MirrorPrevious(evDiff)
-//  val rampAlgo = MirrorAndSqueeze(evDiff)
-//  val rampAlgo = AverageWindow(ev)
-  val rampAlgo = Interpolator(rampHelper)
+  val interpolator = Interpolator(rampHelper)
 
   val exifParser = EXIFParser(defaultConfig)
-  val exifService = Service(defaultConfig, cli, ioUtil, reader, exifParser, rampHelper, rampAlgo, writer)
+  val exifService = Service(defaultConfig, ioUtil, reader, exifParser, rampHelper, interpolator, writer)
 
   val application = Application(exifService)
 }
