@@ -11,9 +11,9 @@ class EVDifferenceSpec extends FunSpec with Matchers {
 
   override protected def withFixture(test: OneArgTest): Outcome = test(EVDifference(EV()))
 
-  private def xmpSS(ss: BigDecimal): EXIFSettings = EXIFSettings(100, ss, BigDecimal("1.0"), BigDecimal("0.0"), false, 3400)
-  private def xmpA(a: BigDecimal): EXIFSettings = EXIFSettings(100, BigDecimal("0.25"), a, BigDecimal("0.0"), false, 3400)
-  private def xmpI(i: Int): EXIFSettings = EXIFSettings(i, BigDecimal("0.25"), BigDecimal("1.0"), BigDecimal("0.0"), false, 3400)
+  private def xmpSS(ss: BigDecimal): EXIFSettings = EXIFSettings(100, ss, BigDecimal("1.0"), BigDecimal("0.0"), 3400)
+  private def xmpA(a: BigDecimal): EXIFSettings = EXIFSettings(100, BigDecimal("0.25"), a, BigDecimal("0.0"), 3400)
+  private def xmpI(i: Int): EXIFSettings = EXIFSettings(i, BigDecimal("0.25"), BigDecimal("1.0"), BigDecimal("0.0"), 3400)
 
   describe("EV difference based on Shutter Speeds") {
     it("should return None when shutter speeds are equal aka. not changed") { EVdiff =>

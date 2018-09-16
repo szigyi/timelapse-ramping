@@ -4,18 +4,13 @@ import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.model.EXIF
-import hu.szigyi.timelapse.ramping.xmp.Service
-
-import cats.data._
+import hu.szigyi.timelapse.ramping.service.Service
+import hu.szigyi.timelapse.ramping.validator.EXIFValidator.EXIFValid
 
 
 class Application(service: Service) extends LazyLogging {
 
-  def readEXIFs(imageFiles: Seq[File]): Seq[EXIF] = imageFiles.map(imageFile => service.getEXIF(imageFile))
-
-  def validate(exifs: Seq[EXIF]): Validated[Seq[ValidatedNel[String, EXIF]], Seq[EXIF]] = {
-    null
-  }
+  def readEXIFs(imageFiles: Seq[File]): Seq[EXIFValid[EXIF]] = imageFiles.map(imageFile => service.getEXIF(imageFile))
 
   def rampExposure(exifs: Seq[EXIF]): Seq[EXIF] = {
     val rampedEVs = service.rampExposure(exifs)
