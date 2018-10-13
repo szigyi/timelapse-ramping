@@ -14,4 +14,5 @@ trait ConfigurationFactory extends LazyLogging {
   val timelapseRampingConfig = appConfig.timelapseRamping
   val imagesConfig = timelapseRampingConfig.imagesConfig
   val defaultConfig = timelapseRampingConfig.default
+  val modesConfig = timelapseRampingConfig.modes
 }
