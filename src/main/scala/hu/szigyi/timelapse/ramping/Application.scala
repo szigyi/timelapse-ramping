@@ -18,7 +18,7 @@ class Application(service: Service) extends LazyLogging {
     val rampedEXIFs = exifs.zip(rampedEVs).map {
       case (exif: EXIF, rampedEV: BigDecimal) => updateExposure(exif, rampedEV)
     }
-//    rampedXMPs.foreach(xmp => logger.info(xmp.settings.exposure.toString))
+//    rampedEXIFs.foreach(exif => logger.info(exif.settings.exposure.toString))
     rampedEXIFs
   }
 
@@ -28,7 +28,7 @@ class Application(service: Service) extends LazyLogging {
     val rampedEXIFs = exifs.zip(rampedTemps).map{
       case (exif: EXIF, rampedWB: Int) => updateTemperature(exif, rampedWB)
     }
-    rampedEXIFs.foreach(exif => logger.info(exif.settings.temperature.toString))
+//    rampedEXIFs.foreach(exif => logger.info(exif.settings.temperature.toString))
     rampedEXIFs
   }
 

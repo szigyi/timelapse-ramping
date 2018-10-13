@@ -17,7 +17,9 @@ object CLMain extends App with LazyLogging with ComponentFactory {
   logger.info("Timelapse Ramping application is running...")
 
   // TODO parsing program arguments - folder of the pictures
-  private val dir = "/Users/szabolcs/jumping_sunset/"
+//  private val dir = "/Users/szabolcs/jumping_sunset/"
+//    private val dir = "E:\\Pictures\\Canon70D\\2018\\2018.07.08 - London - Isle of Dogs - Sunset with jumping exposure\\original"
+    private val dir = "E:\\Pictures\\Canon70D\\2018\\2018.08.06 - London - Isle of Dogs - Sunset ramped - Beautiful sunset with clouds and coloures"
   //  private val dir = "/Volumes/Marvin/Pictures/Canon70D/2018/2018.09.02 - London - Isle of Dogs - Long timelapse - Sunset and Big Carriage constellation"
 
   logger.info(s"1. Listing all the images from $dir ...")
