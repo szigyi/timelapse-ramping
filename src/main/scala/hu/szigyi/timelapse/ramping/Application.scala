@@ -3,32 +3,48 @@ package hu.szigyi.timelapse.ramping
 import java.io.File
 
 import com.typesafe.scalalogging.LazyLogging
-import hu.szigyi.timelapse.ramping.model.XMP
-import hu.szigyi.timelapse.ramping.xmp.XmpService
+import hu.szigyi.timelapse.ramping.model.EXIF
+import hu.szigyi.timelapse.ramping.service.Service
+import hu.szigyi.timelapse.ramping.validator.EXIFValidator.EXIFValid
 
 
-class Application(xmpService: XmpService) extends LazyLogging {
+class Application(service: Service) extends LazyLogging {
 
-  def readXMPs(imageFiles: Seq[File]): Seq[XMP] = imageFiles.map(imageFile => xmpService.getXMP(imageFile))
+  def readEXIFs(imageFiles: Seq[File]): Seq[EXIFValid[EXIF]] = imageFiles.map(imageFile => service.getEXIF(imageFile))
 
-  def rampExposure(xmps: Seq[XMP]): Seq[XMP] = {
-    val rampedEVs = xmpService.rampExposure(xmps)
+  def rampExposure(exifs: Seq[EXIF]): Seq[EXIF] = {
+    val rampedEVs = service.rampExposure(exifs)
 
-    val rampedXMPs = xmps.zip(rampedEVs).map {
-      case (xmp: XMP, rampedEV: BigDecimal) => updateExposure(xmp, rampedEV)
+    val rampedEXIFs = exifs.zip(rampedEVs).map {
+      case (exif: EXIF, rampedEV: BigDecimal) => updateExposure(exif, rampedEV)
     }
-    rampedXMPs.foreach(xmp => logger.info(xmp.settings.exposure.toString))
-    rampedXMPs
+//    rampedEXIFs.foreach(exif => logger.info(exif.settings.exposure.toString))
+    rampedEXIFs
   }
 
-  def exportXMPs(xmps: Seq[XMP]): Unit = xmps.foreach(xmp => xmpService.flushXMP(xmp))
+  def rampTemperature(exifs: Seq[EXIF]): Seq[EXIF] = {
+    val rampedTemps = service.rampTemperature(exifs)
 
-  private def updateExposure(xmp: XMP, exposure: BigDecimal): XMP = {
-    val rampedSettings = xmp.settings.copy(exposure = exposure)
-    xmp.copy(settings = rampedSettings)
+    val rampedEXIFs = exifs.zip(rampedTemps).map{
+      case (exif: EXIF, rampedWB: Int) => updateTemperature(exif, rampedWB)
+    }
+//    rampedEXIFs.foreach(exif => logger.info(exif.settings.temperature.toString))
+    rampedEXIFs
+  }
+
+  def exportXMPs(exifs: Seq[EXIF]): Unit = exifs.foreach(exif => service.flushXMP(exif))
+
+  private def updateExposure(exif: EXIF, exposure: BigDecimal): EXIF = {
+    val rampedSettings = exif.settings.copy(exposure = exposure)
+    exif.copy(settings = rampedSettings)
+  }
+
+  private def updateTemperature(exif: EXIF, temperature: Int): EXIF = {
+    val rampedSettings = exif.settings.copy(temperature = temperature)
+    exif.copy(settings = rampedSettings)
   }
 }
 
 object Application {
-  def apply(xmpService: XmpService): Application = new Application(xmpService)
+  def apply(service: Service): Application = new Application(service)
 }
