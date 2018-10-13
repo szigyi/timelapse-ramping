@@ -1,4 +1,4 @@
-package hu.szigyi.timelapse.ramping.xmp
+package hu.szigyi.timelapse.ramping.service
 
 import java.io.File
 
@@ -8,21 +8,37 @@ import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.drew.metadata.exif.makernotes.CanonMakernoteDirectory
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.algo.ramp.{Interpolator, RampHelper}
-import hu.szigyi.timelapse.ramping.conf.{DefaultConfig}
+import hu.szigyi.timelapse.ramping.conf.DefaultConfig
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
 import hu.szigyi.timelapse.ramping.model.{EXIF, EXIFSettings}
+import hu.szigyi.timelapse.ramping.parser.EXIFParser
+import hu.szigyi.timelapse.ramping.validator.EXIFValidator
+import hu.szigyi.timelapse.ramping.validator.EXIFValidator.EXIFValid
 
 class Service(defaultConfig: DefaultConfig,
               ioUtil: IOUtil,
               reader: Reader,
               exifParser: EXIFParser,
+              exifValidator: EXIFValidator,
               rampHelper: RampHelper,
               ramp: Interpolator,
               writer: Writer) extends LazyLogging {
 
-  def getEXIF(imageFile: File): EXIF = {
+  def getEXIF(imageFile: File): EXIFValid[EXIF] = {
     val metadata: Metadata = readMetadata(imageFile)
-    parseXMP(imageFile, metadata)
+    val exifDir = getMetadataDirectory(imageFile, metadata, classOf[ExifSubIFDDirectory])
+    // TODO get the right Dir, you can use the exif tag to find out what the brand of the camera, or use ENV variable by user
+    val canonDir = getMetadataDirectory(imageFile, metadata, classOf[CanonMakernoteDirectory])
+
+    val shutterSpeed = exifParser.getShutterSpeed(exifDir)
+    val aperture = exifParser.getAperture(exifDir)
+    val exposure = exifParser.getExposure(exifDir)
+    val iso = exifParser.getISO(exifDir)
+    val temperature = exifParser.getTemperature(canonDir)
+
+    val xmpFile = ioUtil.replaceExtension(imageFile, "xmp")
+
+    exifValidator.validateEXIF(imageFile.toPath.toAbsolutePath.toString, xmpFile, iso, shutterSpeed, aperture, exposure, temperature)
   }
 
   def rampExposure(exifs: Seq[EXIF]): Seq[BigDecimal] = {
@@ -58,17 +74,6 @@ class Service(defaultConfig: DefaultConfig,
 //    logger.info(s"XMP is created: ${xmp.xmpFilePath}")
   }
 
-  private def parseXMP(imageFile: File, metadata: Metadata) = {
-    val exifDir = getMetadataDirectory(imageFile, metadata, classOf[ExifSubIFDDirectory])
-    // TODO get the right Dir, you can use the exif tag to find out what the brand of the camera, or use ENV variable by user
-    val canonDir = getMetadataDirectory(imageFile, metadata, classOf[CanonMakernoteDirectory])
-
-    val exifSettings = parseEXIFSettings(exifDir, canonDir)
-
-    val xmpFile = ioUtil.replaceExtension(imageFile, "xmp")
-    EXIF(xmpFile, exifSettings)
-  }
-
   private def getMetadataDirectory[T <: Directory](file: File, metadata: Metadata, clazz: Class[T]): T = {
     val dir = metadata.getFirstDirectoryOfType(clazz)
 
@@ -85,16 +90,6 @@ class Service(defaultConfig: DefaultConfig,
       dir
     }
   }
-
-  private def parseEXIFSettings(exifDir: ExifSubIFDDirectory, canonDir: CanonMakernoteDirectory): EXIFSettings = {
-    val shutterSpeed = exifParser.getShutterSpeed(exifDir)
-    val aperture = exifParser.getAperture(exifDir)
-    val (exposure, isExists) = exifParser.getExposure(exifDir)
-    val iso = exifParser.getISO(exifDir)
-    val wb = exifParser.getTemperature(canonDir)
-
-    EXIFSettings(iso, shutterSpeed, aperture, exposure, isExists, wb)
-  }
 }
 
 object Service {
@@ -102,7 +97,8 @@ object Service {
             ioUtil: IOUtil,
             reader: Reader,
             exifParser: EXIFParser,
+            exifValidator: EXIFValidator,
             rampHelper: RampHelper,
             ramp: Interpolator,
-            writer: Writer): Service = new Service(defaultConfig, ioUtil, reader, exifParser, rampHelper, ramp, writer)
+            writer: Writer): Service = new Service(defaultConfig, ioUtil, reader, exifParser, exifValidator, rampHelper, ramp, writer)
 }

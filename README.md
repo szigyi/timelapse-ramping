@@ -26,12 +26,12 @@ Output
    * XMP sidecar file for every image which was ramped
 
 ## TODO
-   * [ ] Add anti-flickering
+   * [ ] Add anti-flickering - for EV and Temperature as well
+   * [ ] Create reporting mode - it does not write the result into XMP file but creates a CSV with all the data that has been calculated - mark every line, image which was used as key for ramping!.
    * [ ] Use run script which uses the built jar
    * [ ] Use predefined EV as well, not just the calculated one. Predefined one overwrites calculated one.
    * [ ] Set White Balance as well as the EV is set
    * [ ] Improve XMP file writer. It should not be so drastic to overwrite everything. It should just enhance if there is an existing XMP.
-   * [ ] Create reporting mode - where it does not write the result into XMP file but creates a CSV with all the data that has been calculated.
    * [ ] Make app more verbose for users
 
 ## Metadata used for Ramping
