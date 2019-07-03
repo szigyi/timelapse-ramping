@@ -48,19 +48,17 @@ object CLMain extends App with LazyLogging with ComponentFactory {
         logger.info("4. Ramping exposure and/or temperature over the images ...")
         val ramped = application.ramp(validExifs, defaultConfig.rampWhiteBalance)
 
-        if (modesConfig.reportOnly) {
-          report(ramped)
-        } else {
+        if (!modesConfig.reportOnly) {
           logger.info(s"6. Exporting the ramped EXIFs into the XMP (sidecar) files (${exifs.size}) ...")
           application.exportXMPs(ramped)
-          report(ramped)
         }
+        report(ramped)
       }
       case Invalid(violations) => reporter.reportError(violations)
     }
   }
 
-  def report(ramped: Seq[Processed]): Unit = {
+  def report(ramped: Seq[Processed]) = {
     logger.info(s"7. Generating Report ...")
     val report = reporter.reportResult(ramped)
     logger.info(s"8. Exporting the report to ${reportFile.getAbsolutePath} ...")

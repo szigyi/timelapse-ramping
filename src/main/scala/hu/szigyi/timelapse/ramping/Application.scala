@@ -30,7 +30,7 @@ class Application(service: Service) extends LazyLogging {
     }
   }
 
-  def exportXMPs(exifs: Seq[Processed]): Unit = exifs.foreach(exif => service.flushXMP(exif))
+  def exportXMPs(exifs: Seq[Processed]): Unit = exifs.par.foreach(exif => service.flushXMP(exif))
 
   def exportReport(reportFile: File, csv: String): Unit = service.flushReport(reportFile, csv)
 }

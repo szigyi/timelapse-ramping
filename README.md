@@ -27,7 +27,7 @@ Output
 
 ## TODO
    * [ ] Add anti-flickering - for EV and Temperature as well
-   * [ ] Create reporting mode - it does not write the result into XMP file but creates a CSV with all the data that has been calculated - mark every line, image which was used as key for ramping!.
+   * [x] Create reporting mode - it does not write the result into XMP file but creates a CSV with all the data that has been calculated - mark every line, image which was used as key for ramping!.
    * [ ] Use run script which uses the built jar
    * [ ] Use predefined EV as well, not just the calculated one. Predefined one overwrites calculated one.
    * [ ] Set White Balance as well as the EV is set
