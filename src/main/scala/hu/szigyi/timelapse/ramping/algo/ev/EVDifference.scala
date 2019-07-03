@@ -1,6 +1,6 @@
 package hu.szigyi.timelapse.ramping.algo.ev
 
-import hu.szigyi.timelapse.ramping.model.EXIFSettings
+import hu.szigyi.timelapse.ramping.model.Settings
 
 class EVDifference(equations: EV) {
 
@@ -13,7 +13,7 @@ class EVDifference(equations: EV) {
     * @param current
     * @return EVdiff
     */
-  def fromShutterSpeeds(base: EXIFSettings, current: EXIFSettings): Option[BigDecimal] =
+  def fromShutterSpeeds(base: Settings, current: Settings): Option[BigDecimal] =
     if (base.shutterSpeed === current.shutterSpeed) None
     else Some(equations.shutterSpeeds(base.shutterSpeed, current.shutterSpeed))
 
@@ -24,7 +24,7 @@ class EVDifference(equations: EV) {
     * @param current
     * @return EVdiff
     */
-  def fromApertures(base: EXIFSettings, current: EXIFSettings): Option[BigDecimal] =
+  def fromApertures(base: Settings, current: Settings): Option[BigDecimal] =
     if (base.aperture === current.aperture) None
     else Some(equations.apertures(base.aperture, current.aperture))
 
@@ -35,7 +35,7 @@ class EVDifference(equations: EV) {
     * @param current
     * @return EVdiff
     */
-  def fromISOs(base: EXIFSettings, current: EXIFSettings): Option[BigDecimal] =
+  def fromISOs(base: Settings, current: Settings): Option[BigDecimal] =
     if (base.iso.equals(current.iso)) None
     else Some(equations.ISOs(base.iso, current.iso))
 }

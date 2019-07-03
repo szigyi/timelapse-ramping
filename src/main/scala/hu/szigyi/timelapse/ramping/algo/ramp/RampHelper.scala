@@ -1,9 +1,9 @@
 package hu.szigyi.timelapse.ramping.algo.ramp
 
 import hu.szigyi.timelapse.ramping.algo.ev.EV
-import hu.szigyi.timelapse.ramping.model.EXIF
+import hu.szigyi.timelapse.ramping.model.{Metadata}
 
-import scala.math.{BigDecimal, ScalaNumber}
+import scala.math.{BigDecimal}
 import hu.szigyi.timelapse.ramping.math.BigDecimalDecorator._
 
 
@@ -139,7 +139,7 @@ class RampHelper(ev: EV) {
   def negate(seq: Seq[(Int, BigDecimal)]): Seq[(Int, BigDecimal)] = seq.map((t: (Int, BigDecimal)) => (t._1, t._2 * -1))
 
   // TODO extract to an XMP related part, it does not belong to here
-  def calculateEV(exif: EXIF): BigDecimal = ev.EV(exif.settings.aperture, exif.settings.shutterSpeed, exif.settings.iso)
+  def calculateEV(exif: Metadata): BigDecimal = ev.EV(exif.settings.aperture, exif.settings.shutterSpeed, exif.settings.iso)
 
 //  implicit class RichXMP(val xmp: XMP) extends AnyVal{
 //    def toEV: BigDecimal = EV().EV(xmp.settings.aperture, xmp.settings.shutterSpeed, xmp.settings.iso)

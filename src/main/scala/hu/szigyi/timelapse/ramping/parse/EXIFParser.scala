@@ -1,10 +1,10 @@
-package hu.szigyi.timelapse.ramping.parser
+package hu.szigyi.timelapse.ramping.parse
 
 import com.drew.metadata.exif.makernotes.CanonMakernoteDirectory
 import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.conf.DefaultConfig
-import hu.szigyi.timelapse.ramping.parser.ParserError._
+import hu.szigyi.timelapse.ramping.parse.ParserError._
 
 import scala.util.{Failure, Success, Try}
 

@@ -17,6 +17,8 @@ object BigDecimalConverter {
 object BigDecimalDecorator {
   import math.BigDecimal._
 
+  val ZERO: BigDecimal = BigDecimal("0.0", defaultMathContext)
+
   implicit def decorateBigDecimal(bigDecimal: BigDecimal): BigDecimalExt = BigDecimalExt(bigDecimal)
 
   sealed case class BigDecimalExt(bd1: BigDecimal) {
@@ -29,7 +31,7 @@ object BigDecimalDecorator {
     def `^2`: BigDecimal = {
       import BigDecimalConverter._
       import ch.obermuhlner.math.big.BigDecimalMath._
-      pow(bd1, 2l, defaultMathContext)
+      pow(bd1, 2L, defaultMathContext)
     }
 
     def neg: BigDecimal = bd1 * -1

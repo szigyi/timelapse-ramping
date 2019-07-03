@@ -7,9 +7,9 @@ import cats.data.{NonEmptyList, Validated}
 import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.factory.ComponentFactory
-import hu.szigyi.timelapse.ramping.model.EXIF
-import hu.szigyi.timelapse.ramping.validator.EXIFValidator.EXIFValid
-import hu.szigyi.timelapse.ramping.validator.Violations.Violation
+import hu.szigyi.timelapse.ramping.model.{Metadata, Processed, ProcessedSettings}
+import hu.szigyi.timelapse.ramping.validate.EXIFValidator.EXIFValid
+import hu.szigyi.timelapse.ramping.validate.Violations.Violation
 
 import scala.util.{Failure, Success, Try}
 
@@ -19,7 +19,12 @@ object CLMain extends App with LazyLogging with ComponentFactory {
   // TODO parsing program arguments - folder of the pictures
 //  private val dir = "/Users/szabolcs/jumping_sunset/"
 //    private val dir = "E:\\Pictures\\Canon70D\\2018\\2018.07.08 - London - Isle of Dogs - Sunset with jumping exposure\\original"
-    private val dir = "E:\\Pictures\\Canon70D\\2018\\2018.08.06 - London - Isle of Dogs - Sunset ramped - Beautiful sunset with clouds and coloures"
+//    private val dir = "G:\\Pictures\\Canon70D\\2018\\2018.08.06 - London - Isle of Dogs - Sunset ramped - Beautiful sunset with clouds and coloures"
+//    private val dir = "G:\\Pictures\\Canon70D\\2018\\2018.10.21 - London - Isle of Dogs - Sunset timelapse\\original"
+//    private val dir = "G:\\Pictures\\Canon70D\\2018\\2018.06.03 - London - Isle of Dogs - Sunset through filters\\original\\transition"
+//    private val dir = "G:\\Pictures\\Canon70D\\2018\\2018.09.02 - London - Isle of Dogs - Long timelapse - Sunset and Big Carriage constellation"
+    private val dir = "G:\\Pictures\\Canon70D\\2019\\2019.04.21 - Scotland - Isle of Skye\\Sunrise - Fog storm\\The Quiraing"
+  private val reportFile = new File(dir + "/csv_report.csv")
   //  private val dir = "/Volumes/Marvin/Pictures/Canon70D/2018/2018.09.02 - London - Isle of Dogs - Long timelapse - Sunset and Big Carriage constellation"
 
   logger.info(s"1. Listing all the images from $dir ...")
@@ -33,31 +38,33 @@ object CLMain extends App with LazyLogging with ComponentFactory {
   def processImages(imageFiles: Seq[File]) = {
     logger.info(s"\tFound ${imageFiles.size} images.")
     logger.info(s"2. Reading EXIF metadata from the images ...")
-    val exifs: Seq[EXIFValid[EXIF]] = application.readEXIFs(imageFiles)
+    val exifs: Seq[EXIFValid[Metadata]] = application.readEXIFs(imageFiles)
 
     logger.info("3. Validating the EXIF data ...")
-    val validatedExifs: Validated[NonEmptyList[Violation], Seq[EXIF]] = exifs.toList.sequence[EXIFValid, EXIF]
+    val validatedExifs: Validated[NonEmptyList[Violation], Seq[Metadata]] = exifs.toList.sequence[EXIFValid, Metadata]
     validatedExifs match {
       case Valid(validExifs) => {
-        val rampedEXIFs = rampingImages(validExifs)
-        logger.info(s"6. Exporting the ramped EXIFs into the XMP (sidecar) files (${exifs.size}) ...")
-        application.exportXMPs(rampedEXIFs)
+        logger.info("\tEXIFs data are valid.")
+        logger.info("4. Ramping exposure and/or temperature over the images ...")
+        val ramped = application.ramp(validExifs, defaultConfig.rampWhiteBalance)
+
+        if (modesConfig.reportOnly) {
+          report(ramped)
+        } else {
+          logger.info(s"6. Exporting the ramped EXIFs into the XMP (sidecar) files (${exifs.size}) ...")
+          application.exportXMPs(ramped)
+          report(ramped)
+        }
       }
-      case Invalid(violations) => reporter.report(violations)
+      case Invalid(violations) => reporter.reportError(violations)
     }
   }
 
-  def rampingImages(exifs: Seq[EXIF]): Seq[EXIF] = {
-    logger.info("\tEXIFs data are valid.")
-    logger.info("4. Ramping exposure over the images ...")
-    val rampedEVs: Seq[EXIF] = application.rampExposure(exifs)
+  def report(ramped: Seq[Processed]): Unit = {
+    logger.info(s"7. Generating Report ...")
+    val report = reporter.reportResult(ramped)
+    logger.info(s"8. Exporting the report to ${reportFile.getAbsolutePath} ...")
+    application.exportReport(reportFile, report)
 
-    if (defaultConfig.rampWhiteBalance) {
-      logger.info("5. Ramping temperature over the images ...")
-      application.rampTemperature(rampedEVs)
-    } else {
-      logger.info("\tNot ramping temperature over the images.")
-      rampedEVs
-    }
   }
 }

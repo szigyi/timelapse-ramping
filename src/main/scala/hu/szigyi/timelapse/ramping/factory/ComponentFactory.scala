@@ -5,10 +5,10 @@ import hu.szigyi.timelapse.ramping.Application
 import hu.szigyi.timelapse.ramping.algo.ev.EV
 import hu.szigyi.timelapse.ramping.algo.ramp.{Interpolator, RampHelper}
 import hu.szigyi.timelapse.ramping.io.{IOUtil, Reader, Writer}
-import hu.szigyi.timelapse.ramping.parser.EXIFParser
+import hu.szigyi.timelapse.ramping.parse.EXIFParser
 import hu.szigyi.timelapse.ramping.report.Reporter
 import hu.szigyi.timelapse.ramping.service.Service
-import hu.szigyi.timelapse.ramping.validator.EXIFValidator
+import hu.szigyi.timelapse.ramping.validate.EXIFValidator
 
 trait ComponentFactory extends LazyLogging with ConfigurationFactory {
 

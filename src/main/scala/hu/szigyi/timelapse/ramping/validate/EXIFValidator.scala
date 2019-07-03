@@ -1,16 +1,16 @@
-package hu.szigyi.timelapse.ramping.validator
+package hu.szigyi.timelapse.ramping.validate
 
 import java.io.File
 
 import cats.implicits._
 import cats.data.Validated._
-import cats.data.{ValidatedNel}
+import cats.data.ValidatedNel
 import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.conf.DefaultConfig
-import hu.szigyi.timelapse.ramping.model.{EXIF, EXIFSettings}
-import hu.szigyi.timelapse.ramping.parser.ParserError._
-import hu.szigyi.timelapse.ramping.validator.EXIFValidator.EXIFValid
-import hu.szigyi.timelapse.ramping.validator.Violations._
+import hu.szigyi.timelapse.ramping.model.{Metadata, Settings}
+import hu.szigyi.timelapse.ramping.parse.ParserError._
+import hu.szigyi.timelapse.ramping.validate.EXIFValidator.EXIFValid
+import hu.szigyi.timelapse.ramping.validate.Violations._
 
 import scala.util.{Failure, Success, Try}
 
@@ -129,12 +129,12 @@ class EXIFValidator(default: DefaultConfig) extends LazyLogging {
     }
   }
 
-  def validateEXIFSettings(imagePath: String,
-                           iso: Try[Int],
-                           shutterSpeed: Try[BigDecimal],
-                           aperture: Try[BigDecimal],
-                           exposure: Try[BigDecimal],
-                           temperature: Try[Int]): EXIFValid[EXIFSettings] = {
+  def validateSettings(imagePath: String,
+                       iso: Try[Int],
+                       shutterSpeed: Try[BigDecimal],
+                       aperture: Try[BigDecimal],
+                       exposure: Try[BigDecimal],
+                       temperature: Try[Int]): EXIFValid[Settings] = {
 
     val isoParsed = isParsed[Int](iso, imagePath)
     val isoRange = inRange[Int](isoParsed, ISORange, imagePath)
@@ -149,7 +149,7 @@ class EXIFValidator(default: DefaultConfig) extends LazyLogging {
     val temperatureParsed = isParsed[Int](temperature, imagePath)
     val temperatureRange = inRange[Int](temperatureParsed, TemperatureRange, imagePath)
 
-    (isoRange, shutterParsed, apertureRange, exposureParsed, temperatureRange).map5(EXIFSettings)
+    (isoRange, shutterParsed, apertureRange, exposureParsed, temperatureRange).map5(Settings)
   }
 
   def validateEXIF(imagePath: String,
@@ -158,12 +158,14 @@ class EXIFValidator(default: DefaultConfig) extends LazyLogging {
                    shutterSpeed: Try[BigDecimal],
                    aperture: Try[BigDecimal],
                    exposure: Try[BigDecimal],
-                   temperature: Try[Int]): EXIFValid[EXIF] = {
+                   temperature: Try[Int]): EXIFValid[Metadata] = {
     (validateFile(xmpFilePath),
-      validateEXIFSettings(imagePath, iso, shutterSpeed, aperture, exposure, temperature)).map2(EXIF)
+      validateBoolean(false),
+      validateSettings(imagePath, iso, shutterSpeed, aperture, exposure, temperature)).map3(Metadata)
   }
 
   private def validateFile(file: File): EXIFValid[File] = valid(file)
+  private def validateBoolean(b: Boolean): EXIFValid[Boolean] = valid(b)
 }
 
 object EXIFValidator {
