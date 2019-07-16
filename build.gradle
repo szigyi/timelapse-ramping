@@ -1,4 +1,6 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
+    id 'java'
     id 'scala'
 }
 
@@ -44,5 +46,4 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: "$junitVersion"
     testCompile group: 'org.scalatest', name: "scalatest_$scalaMajorVersion", version: "$scalatestVersion"
-
 }
