@@ -16,3 +16,5 @@ class CLI extends LazyLogging {
 object CLI {
   def apply(): CLI = new CLI()
 }
+
+case class CLIConfig(pathToPictures: String = "")

@@ -1,8 +1,5 @@
 package hu.szigyi.timelapse.ramping.conf
 
-import pureconfig.module.enum._
-import enum.Enum
-
 // reference.conf
 case class ReferenceConfiguration(metadata: MetadataConfig)
 

@@ -22,6 +22,7 @@ ext {
     metadataVersion = "2.11.0"
     bigMathVersion = "2.0.1"
     breezeVersion = "0.13.2"
+    scoptVersion = "3.7.1"
 
     junitVersion = "4.12"
     scalatestVersion = "3.0.5"
@@ -38,6 +39,8 @@ dependencies {
     compile group: 'ch.obermuhlner', name: 'big-math', version: "$bigMathVersion"
     compile group: 'org.scalanlp', name: "breeze_$scalaMajorVersion", version: "$breezeVersion"
     compile group: 'com.drewnoakes', name: 'metadata-extractor', version: "$metadataVersion"
+    compile group: 'com.github.scopt', name: "scopt_$scalaMajorVersion", version: "$scoptVersion"
+
 
     testCompile group: 'junit', name: 'junit', version: "$junitVersion"
     testCompile group: 'org.scalatest', name: "scalatest_$scalaMajorVersion", version: "$scalatestVersion"

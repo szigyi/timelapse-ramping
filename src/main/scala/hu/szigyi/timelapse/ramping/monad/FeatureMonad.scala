@@ -1,6 +1,7 @@
-package hu.szigyi.timelapse.ramping
+package hu.szigyi.timelapse.ramping.monad
 
 import cats.Monad
+
 import scala.language.higherKinds
 
 /**
