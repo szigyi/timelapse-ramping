@@ -47,3 +47,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: "$junitVersion"
     testCompile group: 'org.scalatest', name: "scalatest_$scalaMajorVersion", version: "$scalatestVersion"
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'hu.szigyi.timelapse.ramping.CLMain'
+    }
+}
