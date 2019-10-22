@@ -4,7 +4,7 @@ import java.math.{MathContext, BigDecimal => JavaBigDecimal, RoundingMode => Jav
 
 import scala.math.BigDecimal.RoundingMode.RoundingMode
 
-object MathContext {
+object CustomMathContext {
   def apply(precision: Int, roundMode: JavaRoundingMode) = new MathContext(precision, roundMode)
 }
 

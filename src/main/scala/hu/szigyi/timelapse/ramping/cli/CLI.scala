@@ -4,6 +4,7 @@ import java.io.File
 
 import sys.process._
 import com.typesafe.scalalogging.LazyLogging
+import scala.language.postfixOps
 
 class CLI extends LazyLogging {
 

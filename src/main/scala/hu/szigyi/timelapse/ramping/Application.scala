@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import hu.szigyi.timelapse.ramping.model._
 import hu.szigyi.timelapse.ramping.service.Service
 import hu.szigyi.timelapse.ramping.validate.EXIFValidator.EXIFValid
+import scala.collection.parallel.CollectionConverters._
 
 
 class Application(service: Service) extends LazyLogging {

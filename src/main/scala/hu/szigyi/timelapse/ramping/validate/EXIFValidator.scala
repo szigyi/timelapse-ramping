@@ -149,7 +149,7 @@ class EXIFValidator(default: DefaultConfig) extends LazyLogging {
     val temperatureParsed = isParsed[Int](temperature, imagePath)
     val temperatureRange = inRange[Int](temperatureParsed, TemperatureRange, imagePath)
 
-    (isoRange, shutterParsed, apertureRange, exposureParsed, temperatureRange).map5(Settings)
+    (isoRange, shutterParsed, apertureRange, exposureParsed, temperatureRange).mapN(Settings)
   }
 
   def validateEXIF(imagePath: String,
@@ -161,7 +161,7 @@ class EXIFValidator(default: DefaultConfig) extends LazyLogging {
                    temperature: Try[Int]): EXIFValid[Metadata] = {
     (validateFile(xmpFilePath),
       validateBoolean(false),
-      validateSettings(imagePath, iso, shutterSpeed, aperture, exposure, temperature)).map3(Metadata)
+      validateSettings(imagePath, iso, shutterSpeed, aperture, exposure, temperature)).mapN(Metadata)
   }
 
   private def validateFile(file: File): EXIFValid[File] = valid(file)
